@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(flutter --version:*)",
+      "Bash(flutter create:*)",
+      "Bash(flutter analyze:*)",
+      "Bash(flutter build:*)",
+      "Bash(flutter run:*)",
+      "Bash(timeout 5 cat:*)",
+      "Bash(flutter pub get:*)",
+      "Bash(del /F libwidgetsglass_card.dart libwidgetsanimated_button.dart libproviderstheme_provider.dart)",
+      "Bash(timeout:*)",
+      "Bash(taskkill:*)",
+      "Bash(ping:*)",
+      "Bash(flutter doctor:*)",
+      "Bash(flutter attach:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(git init:*)",
+      "Bash(git add:*)"
+    ]
+  }
+}
