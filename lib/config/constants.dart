@@ -49,3 +49,82 @@ enum WifiEncryptionType {
     );
   }
 }
+
+/// Poster size type enum
+enum PosterSizeType {
+  a4,
+  businessCard,
+}
+
+/// Poster size configuration
+class PosterSize {
+  final PosterSizeType type;
+  final String id;
+  final String name;
+  final String nameKo;
+  final double widthPx;
+  final double heightPx;
+  final double widthMm;
+  final double heightMm;
+  final bool isLandscape;
+  final bool supportsMessage;
+  final bool supportsPasswordDisplay;
+
+  const PosterSize({
+    required this.type,
+    required this.id,
+    required this.name,
+    required this.nameKo,
+    required this.widthPx,
+    required this.heightPx,
+    required this.widthMm,
+    required this.heightMm,
+    required this.isLandscape,
+    this.supportsMessage = true,
+    this.supportsPasswordDisplay = true,
+  });
+
+  double get aspectRatio => widthPx / heightPx;
+}
+
+/// Predefined poster sizes
+class PosterSizes {
+  PosterSizes._();
+
+  static const a4 = PosterSize(
+    type: PosterSizeType.a4,
+    id: 'a4',
+    name: 'A4 Poster',
+    nameKo: 'A4 포스터',
+    widthPx: 2480,
+    heightPx: 3508,
+    widthMm: 210,
+    heightMm: 297,
+    isLandscape: false,
+    supportsMessage: true,
+    supportsPasswordDisplay: true,
+  );
+
+  static const businessCard = PosterSize(
+    type: PosterSizeType.businessCard,
+    id: 'business_card',
+    name: 'Business Card',
+    nameKo: '명함',
+    widthPx: 1063,
+    heightPx: 591,
+    widthMm: 90,
+    heightMm: 50,
+    isLandscape: true,
+    supportsMessage: false,
+    supportsPasswordDisplay: false,
+  );
+
+  static List<PosterSize> get all => [a4, businessCard];
+
+  static PosterSize getById(String id) {
+    return all.firstWhere(
+      (s) => s.id == id,
+      orElse: () => a4,
+    );
+  }
+}

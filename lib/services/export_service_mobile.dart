@@ -5,7 +5,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'export_service.dart';
 
 /// Mobile implementation for saving image to gallery
-Future<ExportResult> saveImage(Uint8List imageBytes) async {
+Future<ExportResult> saveImage(Uint8List imageBytes, String filename) async {
   try {
     // Request permission on Android
     if (Platform.isAndroid) {
@@ -22,7 +22,7 @@ Future<ExportResult> saveImage(Uint8List imageBytes) async {
     final result = await ImageGallerySaver.saveImage(
       imageBytes,
       quality: 100,
-      name: ExportService.generateFilename(),
+      name: filename,
     );
 
     if (result['isSuccess'] == true) {

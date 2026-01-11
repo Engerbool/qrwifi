@@ -28,10 +28,13 @@ class ExportService {
   ExportService._();
 
   /// Export poster widget to image and save
-  static Future<ExportResult> exportPoster(GlobalKey posterKey) async {
+  static Future<ExportResult> exportPoster(
+    GlobalKey posterKey,
+    PosterSize size,
+  ) async {
     try {
-      // Capture widget as image
-      final imageBytes = await _captureWidgetAsImage(posterKey);
+      // Capture widget as image using selected size dimensions
+      final imageBytes = await _captureWidgetAsImage(posterKey, size);
 
       if (imageBytes == null) {
         return ExportResult(
@@ -41,7 +44,7 @@ class ExportService {
       }
 
       // Save using platform-specific implementation
-      return await platform.saveImage(imageBytes);
+      return await platform.saveImage(imageBytes, generateFilename(size));
     } catch (e) {
       return ExportResult(
         success: false,
@@ -51,7 +54,10 @@ class ExportService {
   }
 
   /// Capture widget as PNG image bytes
-  static Future<Uint8List?> _captureWidgetAsImage(GlobalKey key) async {
+  static Future<Uint8List?> _captureWidgetAsImage(
+    GlobalKey key,
+    PosterSize size,
+  ) async {
     try {
       final boundary =
           key.currentContext?.findRenderObject() as RenderRepaintBoundary?;
@@ -61,10 +67,8 @@ class ExportService {
         return null;
       }
 
-      // Calculate pixel ratio for high-quality output
-      // A4 @ 300dpi = 2480 x 3508 pixels
-      // We capture at higher resolution then the preview is scaled
-      const targetWidth = AppConstants.posterWidth;
+      // Calculate pixel ratio for high-quality output using selected size
+      final targetWidth = size.widthPx;
       final currentWidth = boundary.size.width;
       final pixelRatio = targetWidth / currentWidth;
 
@@ -78,12 +82,12 @@ class ExportService {
     }
   }
 
-  /// Generate filename for export
-  static String generateFilename() {
+  /// Generate filename for export (includes size type)
+  static String generateFilename(PosterSize size) {
     final now = DateTime.now();
     final timestamp =
         '${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}_'
         '${now.hour.toString().padLeft(2, '0')}${now.minute.toString().padLeft(2, '0')}${now.second.toString().padLeft(2, '0')}';
-    return 'wifi_poster_$timestamp.png';
+    return 'wifi_${size.id}_$timestamp.png';
   }
 }

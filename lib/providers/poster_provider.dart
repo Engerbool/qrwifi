@@ -16,6 +16,7 @@ class PosterProvider extends ChangeNotifier {
 
   // Poster Customization
   PosterTemplate _selectedTemplate = PosterTemplates.minimal;
+  PosterSize _selectedSize = PosterSizes.a4;
   String _posterTitle = ''; // Empty means use default (FREE WiFi / 무료 WiFi)
   String _customMessage = AppConstants.defaultMessage;
   String _selectedIconPath = 'wifi'; // Built-in icon identifier
@@ -40,12 +41,17 @@ class PosterProvider extends ChangeNotifier {
 
   // Getters - Poster
   PosterTemplate get selectedTemplate => _selectedTemplate;
+  PosterSize get selectedSize => _selectedSize;
   String get posterTitle => _posterTitle;
   String get customMessage => _customMessage;
   String get selectedIconPath => _selectedIconPath;
   Uint8List? get customIconData => _customIconData;
   bool get hasCustomIcon => _customIconData != null;
   String get selectedFont => _selectedFont;
+
+  // Computed - Size-dependent feature availability
+  bool get canShowMessage => _selectedSize.supportsMessage;
+  bool get canShowPassword => _selectedSize.supportsPasswordDisplay;
 
   // Getters - Signature
   String get signatureText => _signatureText;
@@ -101,6 +107,18 @@ class PosterProvider extends ChangeNotifier {
   // Setters - Poster
   void setTemplate(PosterTemplate template) {
     _selectedTemplate = template;
+    notifyListeners();
+  }
+
+  void setSize(PosterSize size) {
+    _selectedSize = size;
+    // Clear irrelevant settings when switching to size that doesn't support them
+    if (!size.supportsMessage) {
+      _customMessage = '';
+    }
+    if (!size.supportsPasswordDisplay) {
+      _showPasswordOnPoster = false;
+    }
     notifyListeners();
   }
 
@@ -179,11 +197,15 @@ class PosterProvider extends ChangeNotifier {
     _isHidden = false;
     _showPasswordOnPoster = false;
     _selectedTemplate = PosterTemplates.minimal;
+    _selectedSize = PosterSizes.a4;
     _posterTitle = '';
     _customMessage = AppConstants.defaultMessage;
     _selectedIconPath = 'wifi';
     _customIconData = null;
     _selectedFont = 'noto';
+    _signatureText = '';
+    _signatureImageData = null;
+    _useSignatureImage = false;
     _isExporting = false;
     _exportError = null;
     notifyListeners();

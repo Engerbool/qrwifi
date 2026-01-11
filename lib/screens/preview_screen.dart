@@ -87,33 +87,45 @@ class _PreviewScreenState extends State<PreviewScreen> {
   }
 
   Widget _buildPosterPreview(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: AppTheme.spacingMD),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-        boxShadow: AppTheme.elevatedShadow,
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-        child: PosterCanvas(
-          posterKey: _posterKey,
-          isPreview: true,
-        ),
-      ),
-    )
-        .animate()
-        .fadeIn(
-          delay: const Duration(milliseconds: 200),
-          duration: const Duration(milliseconds: 500),
+    return Consumer<PosterProvider>(
+      builder: (context, provider, child) {
+        final isLandscape = provider.selectedSize.isLandscape;
+
+        return Center(
+          child: Container(
+            margin: const EdgeInsets.symmetric(vertical: AppTheme.spacingMD),
+            // 가로(명함)는 전체 너비 사용, 세로(A4)는 너비 제한
+            constraints: BoxConstraints(
+              maxWidth: isLandscape ? double.infinity : 400,
+            ),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+              boxShadow: AppTheme.elevatedShadow,
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+              child: PosterCanvas(
+                posterKey: _posterKey,
+                isPreview: true,
+              ),
+            ),
+          ),
         )
-        .scale(
-          begin: const Offset(0.95, 0.95),
-          end: const Offset(1, 1),
-          delay: const Duration(milliseconds: 200),
-          duration: const Duration(milliseconds: 500),
-          curve: Curves.easeOutCubic,
-        );
+            .animate()
+            .fadeIn(
+              delay: const Duration(milliseconds: 200),
+              duration: const Duration(milliseconds: 500),
+            )
+            .scale(
+              begin: const Offset(0.95, 0.95),
+              end: const Offset(1, 1),
+              delay: const Duration(milliseconds: 200),
+              duration: const Duration(milliseconds: 500),
+              curve: Curves.easeOutCubic,
+            );
+      },
+    );
   }
 
   Widget _buildActionButtons(BuildContext context, String lang) {
@@ -200,7 +212,11 @@ class _PreviewScreenState extends State<PreviewScreen> {
     provider.setExportError(null);
 
     try {
-      final result = await ExportService.exportPoster(_posterKey);
+      // Pass selected size to export service
+      final result = await ExportService.exportPoster(
+        _posterKey,
+        provider.selectedSize,
+      );
 
       if (!mounted) return;
 

@@ -11,6 +11,7 @@ import '../providers/locale_provider.dart';
 import '../providers/poster_provider.dart';
 import '../widgets/wifi_form.dart';
 import '../widgets/template_picker.dart';
+import '../widgets/size_picker.dart';
 import '../widgets/icon_picker.dart';
 import '../widgets/font_picker.dart';
 import '../widgets/toss_card.dart';
@@ -132,6 +133,21 @@ class _EditorScreenState extends State<EditorScreen> {
                           ),
                       const SizedBox(height: AppTheme.spacingXL),
 
+                      // Section 2.5: Poster Size
+                      _buildSectionTitle(
+                        context,
+                        AppTranslations.get('poster_size', lang),
+                        2,
+                      ),
+                      const SizedBox(height: AppTheme.spacingMD),
+                      const SizePicker()
+                          .animate()
+                          .fadeIn(
+                            delay: const Duration(milliseconds: 250),
+                            duration: const Duration(milliseconds: 400),
+                          ),
+                      const SizedBox(height: AppTheme.spacingXL),
+
                       // Section 3: QR Icon
                       _buildSectionTitle(context, AppTranslations.get('center_icon', lang), 2),
                       const SizedBox(height: AppTheme.spacingXS),
@@ -207,77 +223,98 @@ class _EditorScreenState extends State<EditorScreen> {
                           ),
                       const SizedBox(height: AppTheme.spacingXL),
 
-                      // Section 5: Custom Message
-                      _buildSectionTitle(context, AppTranslations.get('custom_message', lang), 4),
-                      const SizedBox(height: AppTheme.spacingMD),
-                      TossCard(
-                        padding: const EdgeInsets.all(AppTheme.spacingMD),
-                        child: TextFormField(
-                          controller: _messageController,
-                          style: TextStyle(
-                            color: _isMessageDefault
-                                ? AppTheme.textTertiary
-                                : AppTheme.textPrimary,
-                          ),
-                          decoration: InputDecoration(
-                            prefixIcon: Icon(
-                              Icons.message_outlined,
-                              color: AppTheme.textSecondary,
-                              size: 20,
-                            ),
-                            border: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            focusedBorder: InputBorder.none,
-                            filled: false,
-                            counterStyle: TextStyle(
-                              color: AppTheme.textTertiary,
-                              fontSize: 12,
-                            ),
-                          ),
-                          maxLength: 50,
-                          onTap: () {
-                            if (_isMessageDefault) {
-                              _messageController.selection = TextSelection(
-                                baseOffset: 0,
-                                extentOffset: 0,
-                              );
-                            }
-                          },
-                          onChanged: (value) {
-                            if (_isMessageDefault && value != _defaultMessage) {
-                              // 기본값 상태에서 입력이 들어오면 기본값 지우고 새 입력만 남기기
-                              final newChar = value.replaceFirst(_defaultMessage, '');
-                              setState(() {
-                                _isMessageDefault = false;
-                                _messageController.text = newChar;
-                                _messageController.selection = TextSelection.collapsed(
-                                  offset: newChar.length,
-                                );
-                              });
-                              context.read<PosterProvider>().setCustomMessage(newChar);
-                            } else if (value.isEmpty) {
-                              // 다 지우면 기본값으로 복귀
-                              setState(() {
-                                _isMessageDefault = true;
-                                _messageController.text = _defaultMessage;
-                              });
-                              context.read<PosterProvider>().setCustomMessage(_defaultMessage);
-                            } else {
-                              context.read<PosterProvider>().setCustomMessage(value);
-                            }
-                          },
-                        ),
-                      )
-                          .animate()
-                          .fadeIn(
-                            delay: const Duration(milliseconds: 450),
-                            duration: const Duration(milliseconds: 400),
-                          ),
-                      const SizedBox(height: AppTheme.spacingMD),
+                      // Section 5: Custom Message (only for sizes that support it)
+                      Consumer<PosterProvider>(
+                        builder: (context, provider, child) {
+                          if (!provider.canShowMessage) {
+                            return const SizedBox.shrink();
+                          }
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildSectionTitle(context, AppTranslations.get('custom_message', lang), 4),
+                              const SizedBox(height: AppTheme.spacingMD),
+                              TossCard(
+                                padding: const EdgeInsets.all(AppTheme.spacingMD),
+                                child: TextFormField(
+                                  controller: _messageController,
+                                  style: TextStyle(
+                                    color: _isMessageDefault
+                                        ? AppTheme.textTertiary
+                                        : AppTheme.textPrimary,
+                                  ),
+                                  decoration: InputDecoration(
+                                    prefixIcon: Icon(
+                                      Icons.message_outlined,
+                                      color: AppTheme.textSecondary,
+                                      size: 20,
+                                    ),
+                                    border: InputBorder.none,
+                                    enabledBorder: InputBorder.none,
+                                    focusedBorder: InputBorder.none,
+                                    filled: false,
+                                    counterStyle: TextStyle(
+                                      color: AppTheme.textTertiary,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                  maxLength: 50,
+                                  onTap: () {
+                                    if (_isMessageDefault) {
+                                      _messageController.selection = TextSelection(
+                                        baseOffset: 0,
+                                        extentOffset: 0,
+                                      );
+                                    }
+                                  },
+                                  onChanged: (value) {
+                                    if (_isMessageDefault && value != _defaultMessage) {
+                                      final newChar = value.replaceFirst(_defaultMessage, '');
+                                      setState(() {
+                                        _isMessageDefault = false;
+                                        _messageController.text = newChar;
+                                        _messageController.selection = TextSelection.collapsed(
+                                          offset: newChar.length,
+                                        );
+                                      });
+                                      context.read<PosterProvider>().setCustomMessage(newChar);
+                                    } else if (value.isEmpty) {
+                                      setState(() {
+                                        _isMessageDefault = true;
+                                        _messageController.text = _defaultMessage;
+                                      });
+                                      context.read<PosterProvider>().setCustomMessage(_defaultMessage);
+                                    } else {
+                                      context.read<PosterProvider>().setCustomMessage(value);
+                                    }
+                                  },
+                                ),
+                              )
+                                  .animate()
+                                  .fadeIn(
+                                    delay: const Duration(milliseconds: 450),
+                                    duration: const Duration(milliseconds: 400),
+                                  ),
+                              const SizedBox(height: AppTheme.spacingMD),
+                            ],
+                          );
+                        },
+                      ),
 
-                      // Show password option
-                      _buildShowPasswordOption(context, lang),
-                      const SizedBox(height: AppTheme.spacingXL),
+                      // Show password option (only for sizes that support it)
+                      Consumer<PosterProvider>(
+                        builder: (context, provider, child) {
+                          if (!provider.canShowPassword) {
+                            return const SizedBox.shrink();
+                          }
+                          return Column(
+                            children: [
+                              _buildShowPasswordOption(context, lang),
+                              const SizedBox(height: AppTheme.spacingXL),
+                            ],
+                          );
+                        },
+                      ),
 
                       // Section 6: Signature
                       _buildSectionTitle(

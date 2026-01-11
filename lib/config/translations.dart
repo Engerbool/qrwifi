@@ -18,8 +18,12 @@ class AppTranslations {
       'ko': '템플릿 선택',
     },
     'feature_download': {
-      'en': 'Download A4 poster',
-      'ko': 'A4 포스터 다운로드',
+      'en': 'Download printable poster',
+      'ko': '인쇄용 포스터 다운로드',
+    },
+    'poster_size': {
+      'en': 'Poster Size',
+      'ko': '포스터 크기',
     },
     'continue_google': {
       'en': 'Continue with Google',
@@ -68,8 +72,8 @@ class AppTranslations {
       'ko': '포스터 다운로드',
     },
     'step3_subtitle': {
-      'en': 'Get your A4 printable file',
-      'ko': 'A4 인쇄용 파일 받기',
+      'en': 'Get your printable file',
+      'ko': '인쇄용 파일 받기',
     },
     'info1': {
       'en': 'Completely free, use without worry',

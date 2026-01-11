@@ -1,14 +1,11 @@
-import 'dart:convert';
 import 'dart:typed_data';
 // ignore: avoid_web_libraries_in_flutter
 import 'dart:html' as html;
 import 'export_service.dart';
 
 /// Web implementation for saving image
-Future<ExportResult> saveImage(Uint8List imageBytes) async {
+Future<ExportResult> saveImage(Uint8List imageBytes, String filename) async {
   try {
-    final filename = ExportService.generateFilename();
-
     // Create blob and download link
     final blob = html.Blob([imageBytes], 'image/png');
     final url = html.Url.createObjectUrlFromBlob(blob);
