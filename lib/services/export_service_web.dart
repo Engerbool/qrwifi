@@ -11,21 +11,11 @@ Future<ExportResult> saveImage(Uint8List imageBytes, String filename) async {
     final isIOS = userAgent.contains('iphone') || userAgent.contains('ipad');
     final isAndroid = userAgent.contains('android');
 
-    // In-app browsers (Kakao, Naver, Facebook, Instagram, etc.)
-    final isInAppBrowser = userAgent.contains('kakaotalk') ||
-        userAgent.contains('naver') ||
-        userAgent.contains('fban') ||
-        userAgent.contains('fbav') ||
-        userAgent.contains('instagram');
-
-    if (isInAppBrowser) {
-      // In-app browsers: Open image directly (user can long-press to save)
-      return _openImageDirectly(imageBytes, filename);
-    } else if (isIOS) {
+    if (isIOS) {
       // iOS Safari: Share API works best
       return await _tryShareOrFallback(imageBytes, filename);
     } else if (isAndroid) {
-      // Android Chrome/Samsung: Direct download
+      // Android (including in-app browsers): Direct download
       return _downloadForAndroid(imageBytes, filename);
     } else {
       // Desktop: traditional download
@@ -39,30 +29,7 @@ Future<ExportResult> saveImage(Uint8List imageBytes, String filename) async {
   }
 }
 
-/// In-app browsers: Open image directly for long-press save
-ExportResult _openImageDirectly(Uint8List imageBytes, String filename) {
-  try {
-    // Convert to base64 data URL
-    final base64 = base64Encode(imageBytes);
-    final dataUrl = 'data:image/png;base64,$base64';
-
-    // Open image in current window
-    web.window.location.href = dataUrl;
-
-    return ExportResult(
-      success: true,
-      message: '이미지를 길게 눌러 저장하세요.',
-      filePath: filename,
-    );
-  } catch (e) {
-    return ExportResult(
-      success: false,
-      message: '이미지 열기 실패: ${e.toString()}',
-    );
-  }
-}
-
-/// Android: Direct download only (no share fallback)
+/// Android: Direct download (including in-app browsers like Kakao, Naver)
 ExportResult _downloadForAndroid(Uint8List imageBytes, String filename) {
   try {
     // Create blob URL for download
