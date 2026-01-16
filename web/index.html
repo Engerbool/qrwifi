@@ -35,12 +35,29 @@
 <body>
   <script>
     // bfcache(Back/Forward Cache)에서 복원된 경우 새로고침
-    // 이전 세션 상태가 캐시되어 노출되는 것을 방지
     window.addEventListener('pageshow', function(event) {
       if (event.persisted) {
         window.location.reload();
       }
     });
+
+    // 카카오 인앱 브라우저 대응: 페이지가 다시 보일 때 새로고침
+    (function() {
+      var ua = navigator.userAgent.toLowerCase();
+      var isKakao = ua.indexOf('kakaotalk') > -1;
+
+      if (isKakao) {
+        var hidden = false;
+        document.addEventListener('visibilitychange', function() {
+          if (document.hidden) {
+            hidden = true;
+          } else if (hidden) {
+            // 페이지가 다시 보일 때 새로고침
+            window.location.reload();
+          }
+        });
+      }
+    })();
   </script>
   <script src="flutter_bootstrap.js" async></script>
 </body>
