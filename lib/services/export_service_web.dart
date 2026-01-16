@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:js_interop';
 import 'package:web/web.dart' as web;
@@ -12,64 +13,97 @@ bool _isMobileBrowser() {
       userAgent.contains('ipad');
 }
 
-/// Check if Web Share API is available and can share files
-bool _canShareFiles() {
-  try {
-    // Check if navigator.canShare exists (indicates file sharing support)
-    final navigator = web.window.navigator;
-    // Use hasProperty check via JS interop
-    return navigator.canShare(web.ShareData()) == true;
-  } catch (e) {
-    return false;
-  }
-}
-
 /// Web implementation for saving image
 Future<ExportResult> saveImage(Uint8List imageBytes, String filename) async {
   try {
     final isMobile = _isMobileBrowser();
 
     if (isMobile) {
-      // For mobile: try Web Share API first, then fallback to new tab
-      final canShare = _canShareFiles();
-
-      if (canShare) {
-        try {
-          // Create a File object for sharing
-          final blob = web.Blob(
-            [imageBytes.toJS].toJS,
-            web.BlobPropertyBag(type: 'image/png'),
-          );
-
-          final file = web.File(
-            [blob].toJS,
-            filename,
-            web.FilePropertyBag(type: 'image/png'),
-          );
-
-          final shareData = web.ShareData(
-            files: [file].toJS,
-          );
-
-          await web.window.navigator.share(shareData).toDart;
-
-          return ExportResult(
-            success: true,
-            message: '포스터가 공유되었습니다!',
-            filePath: filename,
-          );
-        } catch (e) {
-          // Share was cancelled or failed, try fallback
-          return _openInNewTab(imageBytes, filename);
-        }
-      } else {
-        // No share API, open in new tab
-        return _openInNewTab(imageBytes, filename);
-      }
+      // Mobile: Try Web Share API first
+      return await _tryShareOrFallback(imageBytes, filename);
     } else {
       // Desktop: use traditional download
       return _downloadFile(imageBytes, filename);
     }
+  } catch (e) {
+    return ExportResult(
+      success: false,
+      message: 'Failed to download: ${e.toString()}',
+    );
+  }
+}
+
+/// Try Web Share API, fallback to data URL download
+Future<ExportResult> _tryShareOrFallback(
+    Uint8List imageBytes, String filename) async {
+  try {
+    // Create blob and file for sharing
+    final blob = web.Blob(
+      [imageBytes.toJS].toJS,
+      web.BlobPropertyBag(type: 'image/png'),
+    );
+
+    final file = web.File(
+      [blob].toJS,
+      filename,
+      web.FilePropertyBag(type: 'image/png'),
+    );
+
+    // Check if we can share files
+    final shareData = web.ShareData(files: [file].toJS);
+
+    if (web.window.navigator.canShare(shareData)) {
+      // Share API available and can share files
+      await web.window.navigator.share(shareData).toDart;
+      return ExportResult(
+        success: true,
+        message: '포스터가 공유되었습니다!',
+        filePath: filename,
+      );
+    } else {
+      // Can't share files, use data URL approach
+      return _downloadWithDataUrl(imageBytes, filename);
+    }
+  } catch (e) {
+    // Share failed or was cancelled, try data URL approach
+    return _downloadWithDataUrl(imageBytes, filename);
+  }
+}
+
+/// Download using data URL (works better on some mobile browsers)
+ExportResult _downloadWithDataUrl(Uint8List imageBytes, String filename) {
+  try {
+    // Convert to base64 data URL
+    final base64 = base64Encode(imageBytes);
+    final dataUrl = 'data:image/png;base64,$base64';
+
+    // Create download link
+    final anchor = web.document.createElement('a') as web.HTMLAnchorElement;
+    anchor.href = dataUrl;
+    anchor.download = filename;
+
+    // For iOS Safari, we need to open in same window
+    final userAgent = web.window.navigator.userAgent.toLowerCase();
+    if (userAgent.contains('iphone') || userAgent.contains('ipad')) {
+      // iOS: Open data URL directly (user can long-press to save)
+      web.window.location.href = dataUrl;
+      return ExportResult(
+        success: true,
+        message: '이미지가 열렸습니다. 길게 눌러 저장하세요.',
+        filePath: filename,
+      );
+    }
+
+    // Android and others: try anchor click
+    web.document.body?.append(anchor);
+    anchor.click();
+    anchor.remove();
+
+    return ExportResult(
+      success: true,
+      message: '포스터가 다운로드되었습니다!',
+      filePath: filename,
+    );
   } catch (e) {
     return ExportResult(
       success: false,
@@ -107,31 +141,6 @@ ExportResult _downloadFile(Uint8List imageBytes, String filename) {
     return ExportResult(
       success: false,
       message: 'Failed to download: ${e.toString()}',
-    );
-  }
-}
-
-/// Fallback: open image in new tab for manual save
-ExportResult _openInNewTab(Uint8List imageBytes, String filename) {
-  try {
-    final blob = web.Blob(
-      [imageBytes.toJS].toJS,
-      web.BlobPropertyBag(type: 'image/png'),
-    );
-    final url = web.URL.createObjectURL(blob);
-
-    // Open in new tab
-    web.window.open(url, '_blank');
-
-    return ExportResult(
-      success: true,
-      message: '새 탭에서 이미지를 길게 눌러 저장하세요.',
-      filePath: filename,
-    );
-  } catch (e) {
-    return ExportResult(
-      success: false,
-      message: 'Failed to open image: ${e.toString()}',
     );
   }
 }
