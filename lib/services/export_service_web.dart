@@ -11,11 +11,21 @@ Future<ExportResult> saveImage(Uint8List imageBytes, String filename) async {
     final isIOS = userAgent.contains('iphone') || userAgent.contains('ipad');
     final isAndroid = userAgent.contains('android');
 
+    // In-app browsers (Kakao, Naver, Facebook, Instagram, etc.)
+    final isInAppBrowser = userAgent.contains('kakaotalk') ||
+        userAgent.contains('naver') ||
+        userAgent.contains('fban') ||
+        userAgent.contains('fbav') ||
+        userAgent.contains('instagram');
+
     if (isIOS) {
       // iOS Safari: Share API works best
       return await _tryShareOrFallback(imageBytes, filename);
+    } else if (isInAppBrowser) {
+      // In-app browsers: Use Data URL (Blob URL doesn't work properly)
+      return _downloadWithDataUrl(imageBytes, filename);
     } else if (isAndroid) {
-      // Android (including in-app browsers): Direct download
+      // Android Chrome/Samsung: Blob URL download
       return _downloadForAndroid(imageBytes, filename);
     } else {
       // Desktop: traditional download
@@ -104,31 +114,20 @@ Future<ExportResult> _tryShareOrFallback(
   }
 }
 
-/// Download using data URL (works better on some mobile browsers)
+/// Download using data URL (works better on in-app browsers)
 ExportResult _downloadWithDataUrl(Uint8List imageBytes, String filename) {
   try {
     // Convert to base64 data URL
     final base64 = base64Encode(imageBytes);
     final dataUrl = 'data:image/png;base64,$base64';
 
-    // Create download link
+    // Create download link with data URL
     final anchor = web.document.createElement('a') as web.HTMLAnchorElement;
     anchor.href = dataUrl;
     anchor.download = filename;
+    anchor.style.display = 'none';
 
-    // For iOS Safari, we need to open in same window
-    final userAgent = web.window.navigator.userAgent.toLowerCase();
-    if (userAgent.contains('iphone') || userAgent.contains('ipad')) {
-      // iOS: Open data URL directly (user can long-press to save)
-      web.window.location.href = dataUrl;
-      return ExportResult(
-        success: true,
-        message: '이미지가 열렸습니다. 길게 눌러 저장하세요.',
-        filePath: filename,
-      );
-    }
-
-    // Android and others: try anchor click
+    // Add to DOM, click, and remove
     web.document.body?.append(anchor);
     anchor.click();
     anchor.remove();
