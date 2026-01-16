@@ -41,7 +41,7 @@
       }
     });
 
-    // 카카오 인앱 브라우저 대응: 페이지가 다시 보일 때 새로고침
+    // 카카오 인앱 브라우저 대응: 페이지가 다시 보일 때 홈으로 이동
     (function() {
       var ua = navigator.userAgent.toLowerCase();
       var isKakao = ua.indexOf('kakaotalk') > -1;
@@ -52,8 +52,8 @@
           if (document.hidden) {
             hidden = true;
           } else if (hidden) {
-            // 페이지가 다시 보일 때 새로고침
-            window.location.reload();
+            // 페이지가 다시 보일 때 홈으로 리다이렉트
+            window.location.href = '/';
           }
         });
       }
