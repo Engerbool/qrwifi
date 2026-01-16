@@ -16,11 +16,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      // 앱 시작 시 이전 세션 상태 초기화 (프라이버시 보호)
-      context.read<PosterProvider>().reset();
-      _navigateToHome();
-    });
+    _navigateToHome();
   }
 
   Future<void> _navigateToHome() async {
