@@ -114,27 +114,25 @@ Future<ExportResult> _tryShareOrFallback(
   }
 }
 
-/// Download using data URL (works better on in-app browsers)
+/// Download using Data URL (for in-app browsers like Kakao)
+/// Note: Kakao ignores download attribute, so filename will be random base64 string
 ExportResult _downloadWithDataUrl(Uint8List imageBytes, String filename) {
   try {
-    // Convert to base64 data URL
     final base64 = base64Encode(imageBytes);
     final dataUrl = 'data:image/png;base64,$base64';
 
-    // Create download link with data URL
     final anchor = web.document.createElement('a') as web.HTMLAnchorElement;
     anchor.href = dataUrl;
     anchor.download = filename;
     anchor.style.display = 'none';
 
-    // Add to DOM, click, and remove
     web.document.body?.append(anchor);
     anchor.click();
     anchor.remove();
 
     return ExportResult(
       success: true,
-      message: '포스터가 다운로드되었습니다!',
+      message: '포스터가 다운로드되었습니다!\n(파일명은 갤러리에서 변경 가능)',
       filePath: filename,
     );
   } catch (e) {

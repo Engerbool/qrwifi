@@ -17,7 +17,29 @@
       "Bash(netstat:*)",
       "Bash(findstr:*)",
       "Bash(git init:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nInitial commit: WiFi QR 포스터 생성기\n\n주요 기능:\n- WiFi QR 코드 포스터 생성\n- 다양한 템플릿 선택\n- 폰트 선택 \\(Noto Sans, Gowun Batang, Gaegu, Diphylleia\\)\n- QR 중앙 아이콘 커스터마이징\n- 포스터 제목/메시지 커스터마이징\n- 서명 기능 \\(텍스트/이미지\\)\n- 비밀번호 표시 옵션\n- 한국어/영어 지원\n- 다크모드 지원\n- 웹/모바일 지원\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(flutter clean:*)",
+      "Bash(flutter pub add:*)",
+      "Bash(pip install:*)",
+      "Bash(python -m rembg:*)",
+      "Bash(python -c:*)",
+      "Bash(dir:*)",
+      "Bash(flutter pub:*)",
+      "Bash(git commit:*)",
+      "Bash(git remote:*)",
+      "Bash(git push:*)",
+      "mcp__plugin_firebase_firebase__firebase_get_environment",
+      "mcp__plugin_firebase_firebase__firebase_list_projects",
+      "mcp__plugin_firebase_firebase__firebase_create_project",
+      "mcp__plugin_firebase_firebase__firebase_update_environment",
+      "mcp__plugin_firebase_firebase__firebase_init",
+      "Bash(firebase deploy:*)",
+      "WebSearch",
+      "Bash(find:*)",
+      "Bash(while read f)",
+      "Bash(do grep -l \"Alt\\\\|keyboard\\\\|RawKey\\\\|Shortcut\" \"$f\")",
+      "Bash(done)"
     ]
   }
 }
