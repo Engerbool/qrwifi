@@ -4,23 +4,19 @@ import 'dart:js_interop';
 import 'package:web/web.dart' as web;
 import 'export_service.dart';
 
-/// Check if running on mobile browser
-bool _isMobileBrowser() {
-  final userAgent = web.window.navigator.userAgent.toLowerCase();
-  return userAgent.contains('mobile') ||
-      userAgent.contains('android') ||
-      userAgent.contains('iphone') ||
-      userAgent.contains('ipad');
-}
-
 /// Web implementation for saving image
 Future<ExportResult> saveImage(Uint8List imageBytes, String filename) async {
   try {
-    final isMobile = _isMobileBrowser();
+    final userAgent = web.window.navigator.userAgent.toLowerCase();
+    final isIOS = userAgent.contains('iphone') || userAgent.contains('ipad');
+    final isAndroid = userAgent.contains('android');
 
-    if (isMobile) {
-      // Mobile: Try Web Share API first
+    if (isIOS) {
+      // iOS: Share API works best (anchor download doesn't work)
       return await _tryShareOrFallback(imageBytes, filename);
+    } else if (isAndroid) {
+      // Android: Direct download (no share fallback)
+      return _downloadForAndroid(imageBytes, filename);
     } else {
       // Desktop: use traditional download
       return _downloadFile(imageBytes, filename);
@@ -29,6 +25,44 @@ Future<ExportResult> saveImage(Uint8List imageBytes, String filename) async {
     return ExportResult(
       success: false,
       message: 'Failed to download: ${e.toString()}',
+    );
+  }
+}
+
+/// Android: Direct download only (no share fallback)
+ExportResult _downloadForAndroid(Uint8List imageBytes, String filename) {
+  try {
+    // Create blob URL for download
+    final blob = web.Blob(
+      [imageBytes.toJS].toJS,
+      web.BlobPropertyBag(type: 'image/png'),
+    );
+    final url = web.URL.createObjectURL(blob);
+
+    // Create and click download link
+    final anchor = web.document.createElement('a') as web.HTMLAnchorElement;
+    anchor.href = url;
+    anchor.download = filename;
+    anchor.style.display = 'none';
+
+    web.document.body?.append(anchor);
+    anchor.click();
+    anchor.remove();
+
+    // Revoke URL after a delay (fire and forget)
+    Future.delayed(const Duration(milliseconds: 500), () {
+      web.URL.revokeObjectURL(url);
+    });
+
+    return ExportResult(
+      success: true,
+      message: '포스터가 다운로드되었습니다!',
+      filePath: filename,
+    );
+  } catch (e) {
+    return ExportResult(
+      success: false,
+      message: '다운로드 실패: ${e.toString()}',
     );
   }
 }
