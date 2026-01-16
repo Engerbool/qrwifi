@@ -84,10 +84,7 @@ class QrWidget extends StatelessWidget {
 
     // Custom uploaded icon
     if (customIconData != null) {
-      return Image.memory(
-        customIconData!,
-        fit: BoxFit.cover,
-      );
+      return Image.memory(customIconData!, fit: BoxFit.cover);
     }
 
     // Preset icon
@@ -99,11 +96,7 @@ class QrWidget extends StatelessWidget {
     return Container(
       color: foregroundColor,
       child: Center(
-        child: Icon(
-          preset.icon,
-          size: iconSize,
-          color: backgroundColor,
-        ),
+        child: Icon(preset.icon, size: iconSize, color: backgroundColor),
       ),
     );
   }

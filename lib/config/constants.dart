@@ -3,7 +3,7 @@ class AppConstants {
   AppConstants._();
 
   // App Info
-  static const String appName = 'WiFi QR Poster';
+  static const String appName = '우리가게 와이파이';
   static const String appVersion = '1.0.0';
 
   // Output dimensions (A4 @ 300dpi)
@@ -51,10 +51,7 @@ enum WifiEncryptionType {
 }
 
 /// Poster size type enum
-enum PosterSizeType {
-  a4,
-  businessCard,
-}
+enum PosterSizeType { a4, businessCard }
 
 /// Poster size configuration
 class PosterSize {
@@ -122,9 +119,6 @@ class PosterSizes {
   static List<PosterSize> get all => [a4, businessCard];
 
   static PosterSize getById(String id) {
-    return all.firstWhere(
-      (s) => s.id == id,
-      orElse: () => a4,
-    );
+    return all.firstWhere((s) => s.id == id, orElse: () => a4);
   }
 }

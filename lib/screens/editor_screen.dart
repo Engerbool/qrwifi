@@ -9,6 +9,7 @@ import '../config/theme.dart';
 import '../config/translations.dart';
 import '../providers/locale_provider.dart';
 import '../providers/poster_provider.dart';
+import '../utils/responsive.dart';
 import '../widgets/wifi_form.dart';
 import '../widgets/template_picker.dart';
 import '../widgets/size_picker.dart';
@@ -83,169 +84,179 @@ class _EditorScreenState extends State<EditorScreen> {
     super.dispose();
   }
 
+  Future<bool> _onWillPop(String lang) async {
+    final provider = context.read<PosterProvider>();
+    // Check if user has entered any data
+    final hasData = _ssidController.text.isNotEmpty ||
+        _passwordController.text.isNotEmpty ||
+        _titleController.text.isNotEmpty ||
+        provider.signatureText.isNotEmpty;
+
+    if (!hasData) {
+      return true; // Allow back without confirmation
+    }
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(AppTranslations.get('discard_changes', lang)),
+        content: Text(AppTranslations.get('discard_changes_message', lang)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(
+              AppTranslations.get('stay', lang),
+              style: TextStyle(color: AppTheme.primary),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(
+              AppTranslations.get('discard', lang),
+              style: TextStyle(color: AppTheme.error),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    return result ?? false;
+  }
+
   @override
   Widget build(BuildContext context) {
     final locale = context.watch<LocaleProvider>();
     final lang = locale.locale.languageCode;
 
-    return Scaffold(
-      backgroundColor: AppTheme.background,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Header
-            _buildHeader(context, lang),
-            // Content
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(AppTheme.spacingLG),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Section 1: WiFi Details
-                      _buildSectionTitle(context, AppTranslations.get('wifi_network', lang), 0),
-                      const SizedBox(height: AppTheme.spacingMD),
-                      TossCard(
-                        padding: const EdgeInsets.all(AppTheme.spacingLG),
-                        child: WifiForm(
-                          ssidController: _ssidController,
-                          passwordController: _passwordController,
-                          lang: lang,
-                        ),
-                      )
-                          .animate()
-                          .fadeIn(
-                            delay: const Duration(milliseconds: 100),
-                            duration: const Duration(milliseconds: 400),
-                          ),
-                      const SizedBox(height: AppTheme.spacingXL),
-
-                      // Section 2: Template Selection
-                      _buildSectionTitle(context, AppTranslations.get('template', lang), 1),
-                      const SizedBox(height: AppTheme.spacingMD),
-                      const TemplatePicker()
-                          .animate()
-                          .fadeIn(
-                            delay: const Duration(milliseconds: 200),
-                            duration: const Duration(milliseconds: 400),
-                          ),
-                      const SizedBox(height: AppTheme.spacingXL),
-
-                      // Section 2.5: Poster Size
-                      _buildSectionTitle(
-                        context,
-                        AppTranslations.get('poster_size', lang),
-                        2,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        final shouldPop = await _onWillPop(lang);
+        if (shouldPop && mounted) {
+          Navigator.pop(context);
+        }
+      },
+      child: Scaffold(
+        backgroundColor: AppTheme.background,
+        body: SafeArea(
+          child: Column(
+            children: [
+              // Header
+              _buildHeader(context, lang),
+              // Content
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth: Responsive.contentMaxWidth(context),
                       ),
-                      const SizedBox(height: AppTheme.spacingMD),
-                      const SizePicker()
-                          .animate()
-                          .fadeIn(
-                            delay: const Duration(milliseconds: 250),
-                            duration: const Duration(milliseconds: 400),
-                          ),
-                      const SizedBox(height: AppTheme.spacingXL),
-
-                      // Section 3: QR Icon
-                      _buildSectionTitle(context, AppTranslations.get('center_icon', lang), 2),
-                      const SizedBox(height: AppTheme.spacingXS),
-                      Text(
-                        lang == 'ko' ? 'QR 코드 중앙에 표시할 아이콘을 선택하세요' : 'Choose an icon to display in the center of the QR code',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      )
-                          .animate()
-                          .fadeIn(
-                            delay: const Duration(milliseconds: 250),
-                            duration: const Duration(milliseconds: 400),
-                          ),
-                      const SizedBox(height: AppTheme.spacingMD),
-                      const IconPicker()
-                          .animate()
-                          .fadeIn(
-                            delay: const Duration(milliseconds: 300),
-                            duration: const Duration(milliseconds: 400),
-                          ),
-                      const SizedBox(height: AppTheme.spacingXL),
-
-                      // Section 4: Font Selection
-                      _buildSectionTitle(context, lang == 'ko' ? '글씨체' : 'Font', 3),
-                      const SizedBox(height: AppTheme.spacingMD),
-                      const FontPicker()
-                          .animate()
-                          .fadeIn(
-                            delay: const Duration(milliseconds: 350),
-                            duration: const Duration(milliseconds: 400),
-                          ),
-                      const SizedBox(height: AppTheme.spacingXL),
-
-                      // Section 5: Poster Title
-                      _buildSectionTitle(
-                        context,
-                        lang == 'ko' ? '포스터 제목' : 'Poster Title',
-                        3,
-                      ),
-                      const SizedBox(height: AppTheme.spacingMD),
-                      TossCard(
-                        padding: const EdgeInsets.all(AppTheme.spacingMD),
-                        child: TextFormField(
-                          controller: _titleController,
-                          decoration: InputDecoration(
-                            hintText: lang == 'ko' ? '무료 WiFi' : 'FREE WiFi',
-                            hintStyle: TextStyle(
-                              color: AppTheme.textTertiary,
-                            ),
-                            prefixIcon: Icon(
-                              Icons.title_rounded,
-                              color: AppTheme.textSecondary,
-                              size: 20,
-                            ),
-                            border: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            focusedBorder: InputBorder.none,
-                            filled: false,
-                            counterStyle: TextStyle(
-                              color: AppTheme.textTertiary,
-                              fontSize: 12,
-                            ),
-                          ),
-                          maxLength: 30,
-                          onChanged: (value) {
-                            context.read<PosterProvider>().setPosterTitle(value);
-                          },
-                        ),
-                      )
-                          .animate()
-                          .fadeIn(
-                            delay: const Duration(milliseconds: 400),
-                            duration: const Duration(milliseconds: 400),
-                          ),
-                      const SizedBox(height: AppTheme.spacingXL),
-
-                      // Section 5: Custom Message (only for sizes that support it)
-                      Consumer<PosterProvider>(
-                        builder: (context, provider, child) {
-                          if (!provider.canShowMessage) {
-                            return const SizedBox.shrink();
-                          }
-                          return Column(
+                      child: Padding(
+                        padding: Responsive.screenPadding(context),
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _buildSectionTitle(context, AppTranslations.get('custom_message', lang), 4),
+                              // Section 1: WiFi Details
+                              _buildSectionTitle(
+                                context,
+                                AppTranslations.get('wifi_network', lang),
+                                0,
+                              ),
+                              const SizedBox(height: AppTheme.spacingMD),
+                              TossCard(
+                                padding: const EdgeInsets.all(AppTheme.spacingLG),
+                                child: WifiForm(
+                                  ssidController: _ssidController,
+                                  passwordController: _passwordController,
+                                  lang: lang,
+                                ),
+                              ).animate().fadeIn(
+                                delay: const Duration(milliseconds: 100),
+                                duration: const Duration(milliseconds: 400),
+                              ),
+                              const SizedBox(height: AppTheme.spacingXL),
+
+                              // Section 2: Template Selection
+                              _buildSectionTitle(
+                                context,
+                                AppTranslations.get('template', lang),
+                                1,
+                              ),
+                              const SizedBox(height: AppTheme.spacingMD),
+                              const TemplatePicker().animate().fadeIn(
+                                delay: const Duration(milliseconds: 200),
+                                duration: const Duration(milliseconds: 400),
+                              ),
+                              const SizedBox(height: AppTheme.spacingXL),
+
+                              // Section 2.5: Poster Size
+                              _buildSectionTitle(
+                                context,
+                                AppTranslations.get('poster_size', lang),
+                                2,
+                              ),
+                              const SizedBox(height: AppTheme.spacingMD),
+                              const SizePicker().animate().fadeIn(
+                                delay: const Duration(milliseconds: 250),
+                                duration: const Duration(milliseconds: 400),
+                              ),
+                              const SizedBox(height: AppTheme.spacingXL),
+
+                              // Section 3: QR Icon
+                              _buildSectionTitle(
+                                context,
+                                AppTranslations.get('center_icon', lang),
+                                2,
+                              ),
+                              const SizedBox(height: AppTheme.spacingXS),
+                              Text(
+                                lang == 'ko'
+                                    ? 'QR 코드 중앙에 표시할 아이콘을 선택하세요'
+                                    : 'Choose an icon to display in the center of the QR code',
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ).animate().fadeIn(
+                                delay: const Duration(milliseconds: 250),
+                                duration: const Duration(milliseconds: 400),
+                              ),
+                              const SizedBox(height: AppTheme.spacingMD),
+                              const IconPicker().animate().fadeIn(
+                                delay: const Duration(milliseconds: 300),
+                                duration: const Duration(milliseconds: 400),
+                              ),
+                              const SizedBox(height: AppTheme.spacingXL),
+
+                              // Section 4: Font Selection
+                              _buildSectionTitle(
+                                context,
+                                lang == 'ko' ? '글씨체' : 'Font',
+                                3,
+                              ),
+                              const SizedBox(height: AppTheme.spacingMD),
+                              const FontPicker().animate().fadeIn(
+                                delay: const Duration(milliseconds: 350),
+                                duration: const Duration(milliseconds: 400),
+                              ),
+                              const SizedBox(height: AppTheme.spacingXL),
+
+                              // Section 5: Poster Title
+                              _buildSectionTitle(
+                                context,
+                                lang == 'ko' ? '포스터 제목' : 'Poster Title',
+                                3,
+                              ),
                               const SizedBox(height: AppTheme.spacingMD),
                               TossCard(
                                 padding: const EdgeInsets.all(AppTheme.spacingMD),
                                 child: TextFormField(
-                                  controller: _messageController,
-                                  style: TextStyle(
-                                    color: _isMessageDefault
-                                        ? AppTheme.textTertiary
-                                        : AppTheme.textPrimary,
-                                  ),
+                                  controller: _titleController,
                                   decoration: InputDecoration(
+                                    hintText: lang == 'ko' ? '무료 WiFi' : 'FREE WiFi',
+                                    hintStyle: TextStyle(color: AppTheme.textTertiary),
                                     prefixIcon: Icon(
-                                      Icons.message_outlined,
+                                      Icons.title_rounded,
                                       color: AppTheme.textSecondary,
                                       size: 20,
                                     ),
@@ -258,81 +269,133 @@ class _EditorScreenState extends State<EditorScreen> {
                                       fontSize: 12,
                                     ),
                                   ),
-                                  maxLength: 50,
-                                  onTap: () {
-                                    if (_isMessageDefault) {
-                                      _messageController.selection = TextSelection(
-                                        baseOffset: 0,
-                                        extentOffset: 0,
-                                      );
-                                    }
-                                  },
+                                  maxLength: 30,
                                   onChanged: (value) {
-                                    if (_isMessageDefault && value != _defaultMessage) {
-                                      final newChar = value.replaceFirst(_defaultMessage, '');
-                                      setState(() {
-                                        _isMessageDefault = false;
-                                        _messageController.text = newChar;
-                                        _messageController.selection = TextSelection.collapsed(
-                                          offset: newChar.length,
-                                        );
-                                      });
-                                      context.read<PosterProvider>().setCustomMessage(newChar);
-                                    } else if (value.isEmpty) {
-                                      setState(() {
-                                        _isMessageDefault = true;
-                                        _messageController.text = _defaultMessage;
-                                      });
-                                      context.read<PosterProvider>().setCustomMessage(_defaultMessage);
-                                    } else {
-                                      context.read<PosterProvider>().setCustomMessage(value);
-                                    }
+                                    context.read<PosterProvider>().setPosterTitle(value);
                                   },
                                 ),
-                              )
-                                  .animate()
-                                  .fadeIn(
-                                    delay: const Duration(milliseconds: 450),
-                                    duration: const Duration(milliseconds: 400),
-                                  ),
-                              const SizedBox(height: AppTheme.spacingMD),
-                            ],
-                          );
-                        },
-                      ),
+                              ).animate().fadeIn(
+                                delay: const Duration(milliseconds: 400),
+                                duration: const Duration(milliseconds: 400),
+                              ),
+                              const SizedBox(height: AppTheme.spacingXL),
 
-                      // Show password option (only for sizes that support it)
-                      Consumer<PosterProvider>(
-                        builder: (context, provider, child) {
-                          if (!provider.canShowPassword) {
-                            return const SizedBox.shrink();
-                          }
-                          return Column(
-                            children: [
-                              _buildShowPasswordOption(context, lang),
+                              // Section 5: Custom Message (only for sizes that support it)
+                              Consumer<PosterProvider>(
+                                builder: (context, provider, child) {
+                                  if (!provider.canShowMessage) {
+                                    return const SizedBox.shrink();
+                                  }
+                                  return Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      _buildSectionTitle(
+                                        context,
+                                        AppTranslations.get('custom_message', lang),
+                                        4,
+                                      ),
+                                      const SizedBox(height: AppTheme.spacingMD),
+                                      TossCard(
+                                        padding: const EdgeInsets.all(AppTheme.spacingMD),
+                                        child: TextFormField(
+                                          controller: _messageController,
+                                          style: TextStyle(
+                                            color: _isMessageDefault
+                                                ? AppTheme.textTertiary
+                                                : AppTheme.textPrimary,
+                                          ),
+                                          decoration: InputDecoration(
+                                            prefixIcon: Icon(
+                                              Icons.message_outlined,
+                                              color: AppTheme.textSecondary,
+                                              size: 20,
+                                            ),
+                                            border: InputBorder.none,
+                                            enabledBorder: InputBorder.none,
+                                            focusedBorder: InputBorder.none,
+                                            filled: false,
+                                            counterStyle: TextStyle(
+                                              color: AppTheme.textTertiary,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                          maxLength: 50,
+                                          onTap: () {
+                                            if (_isMessageDefault) {
+                                              _messageController.selection = TextSelection(
+                                                baseOffset: 0,
+                                                extentOffset: 0,
+                                              );
+                                            }
+                                          },
+                                          onChanged: (value) {
+                                            if (_isMessageDefault && value != _defaultMessage) {
+                                              final newChar = value.replaceFirst(_defaultMessage, '');
+                                              setState(() {
+                                                _isMessageDefault = false;
+                                                _messageController.text = newChar;
+                                                _messageController.selection = TextSelection.collapsed(
+                                                  offset: newChar.length,
+                                                );
+                                              });
+                                              context.read<PosterProvider>().setCustomMessage(newChar);
+                                            } else if (value.isEmpty) {
+                                              setState(() {
+                                                _isMessageDefault = true;
+                                                _messageController.text = _defaultMessage;
+                                              });
+                                              context.read<PosterProvider>().setCustomMessage(_defaultMessage);
+                                            } else {
+                                              context.read<PosterProvider>().setCustomMessage(value);
+                                            }
+                                          },
+                                        ),
+                                      ).animate().fadeIn(
+                                        delay: const Duration(milliseconds: 450),
+                                        duration: const Duration(milliseconds: 400),
+                                      ),
+                                      const SizedBox(height: AppTheme.spacingMD),
+                                    ],
+                                  );
+                                },
+                              ),
+
+                              // Show password option (only for sizes that support it)
+                              Consumer<PosterProvider>(
+                                builder: (context, provider, child) {
+                                  if (!provider.canShowPassword) {
+                                    return const SizedBox.shrink();
+                                  }
+                                  return Column(
+                                    children: [
+                                      _buildShowPasswordOption(context, lang),
+                                      const SizedBox(height: AppTheme.spacingXL),
+                                    ],
+                                  );
+                                },
+                              ),
+
+                              // Section 6: Signature
+                              _buildSectionTitle(
+                                context,
+                                lang == 'ko' ? '서명 (선택)' : 'Signature (Optional)',
+                                5,
+                              ),
+                              const SizedBox(height: AppTheme.spacingMD),
+                              _buildSignatureSection(context, lang),
                               const SizedBox(height: AppTheme.spacingXL),
                             ],
-                          );
-                        },
+                          ),
+                        ),
                       ),
-
-                      // Section 6: Signature
-                      _buildSectionTitle(
-                        context,
-                        lang == 'ko' ? '서명 (선택)' : 'Signature (Optional)',
-                        5,
-                      ),
-                      const SizedBox(height: AppTheme.spacingMD),
-                      _buildSignatureSection(context, lang),
-                      const SizedBox(height: AppTheme.spacingXL),
-                    ],
+                    ),
                   ),
                 ),
               ),
-            ),
-            // Bottom button
-            _buildBottomButton(context, lang),
-          ],
+              // Bottom button
+              _buildBottomButton(context, lang),
+            ],
+          ),
         ),
       ),
     );
@@ -348,15 +411,20 @@ class _EditorScreenState extends State<EditorScreen> {
         children: [
           TossIconButton(
             icon: Icons.arrow_back_ios_rounded,
-            onPressed: () => Navigator.pop(context),
+            onPressed: () async {
+              final shouldPop = await _onWillPop(lang);
+              if (shouldPop && mounted) {
+                Navigator.pop(context);
+              }
+            },
             size: 40,
           ),
           const SizedBox(width: AppTheme.spacingSM),
           Text(
             AppTranslations.get('create_poster', lang),
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
           ),
         ],
       ),
@@ -367,15 +435,13 @@ class _EditorScreenState extends State<EditorScreen> {
     return Text(
       title,
       style: Theme.of(context).textTheme.titleSmall?.copyWith(
-            color: AppTheme.textSecondary,
-            fontWeight: FontWeight.w600,
-          ),
-    )
-        .animate()
-        .fadeIn(
-          delay: Duration(milliseconds: 50 * index),
-          duration: const Duration(milliseconds: 400),
-        );
+        color: AppTheme.textSecondary,
+        fontWeight: FontWeight.w600,
+      ),
+    ).animate().fadeIn(
+      delay: Duration(milliseconds: 50 * index),
+      duration: const Duration(milliseconds: 400),
+    );
   }
 
   Widget _buildShowPasswordOption(BuildContext context, String lang) {
@@ -412,7 +478,9 @@ class _EditorScreenState extends State<EditorScreen> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      lang == 'ko' ? 'WiFi 비밀번호를 텍스트로 표시' : 'Display WiFi password as text',
+                      lang == 'ko'
+                          ? 'WiFi 비밀번호를 텍스트로 표시'
+                          : 'Display WiFi password as text',
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ],
@@ -433,12 +501,10 @@ class _EditorScreenState extends State<EditorScreen> {
               ),
             ],
           ),
-        )
-            .animate()
-            .fadeIn(
-              delay: const Duration(milliseconds: 500),
-              duration: const Duration(milliseconds: 400),
-            );
+        ).animate().fadeIn(
+          delay: const Duration(milliseconds: 500),
+          duration: const Duration(milliseconds: 400),
+        );
       },
     );
   }
@@ -467,7 +533,9 @@ class _EditorScreenState extends State<EditorScreen> {
                           color: !provider.useSignatureImage
                               ? AppTheme.primary.withValues(alpha: 0.1)
                               : Colors.transparent,
-                          borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                          borderRadius: BorderRadius.circular(
+                            AppTheme.radiusSmall,
+                          ),
                           border: Border.all(
                             color: !provider.useSignatureImage
                                 ? AppTheme.primary
@@ -514,7 +582,9 @@ class _EditorScreenState extends State<EditorScreen> {
                           color: provider.useSignatureImage
                               ? AppTheme.primary.withValues(alpha: 0.1)
                               : Colors.transparent,
-                          borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                          borderRadius: BorderRadius.circular(
+                            AppTheme.radiusSmall,
+                          ),
                           border: Border.all(
                             color: provider.useSignatureImage
                                 ? AppTheme.primary
@@ -555,10 +625,10 @@ class _EditorScreenState extends State<EditorScreen> {
                 TextFormField(
                   controller: _signatureController,
                   decoration: InputDecoration(
-                    hintText: lang == 'ko' ? '가게 이름, 본인 이름 등' : 'Store name, your name, etc.',
-                    hintStyle: TextStyle(
-                      color: AppTheme.textTertiary,
-                    ),
+                    hintText: lang == 'ko'
+                        ? '가게 이름, 본인 이름 등'
+                        : 'Store name, your name, etc.',
+                    hintStyle: TextStyle(color: AppTheme.textTertiary),
                     prefixIcon: Icon(
                       Icons.edit_rounded,
                       color: AppTheme.textSecondary,
@@ -582,12 +652,10 @@ class _EditorScreenState extends State<EditorScreen> {
                 _buildSignatureImagePicker(context, provider, lang),
             ],
           ),
-        )
-            .animate()
-            .fadeIn(
-              delay: const Duration(milliseconds: 550),
-              duration: const Duration(milliseconds: 400),
-            );
+        ).animate().fadeIn(
+          delay: const Duration(milliseconds: 550),
+          duration: const Duration(milliseconds: 400),
+        );
       },
     );
   }
@@ -616,17 +684,13 @@ class _EditorScreenState extends State<EditorScreen> {
                 onPressed: () => _pickSignatureImage(provider),
                 icon: const Icon(Icons.refresh_rounded, size: 18),
                 label: Text(lang == 'ko' ? '변경' : 'Change'),
-                style: TextButton.styleFrom(
-                  foregroundColor: AppTheme.primary,
-                ),
+                style: TextButton.styleFrom(foregroundColor: AppTheme.primary),
               ),
               TextButton.icon(
                 onPressed: () => provider.clearSignatureImage(),
                 icon: const Icon(Icons.delete_outline_rounded, size: 18),
                 label: Text(lang == 'ko' ? '삭제' : 'Delete'),
-                style: TextButton.styleFrom(
-                  foregroundColor: AppTheme.error,
-                ),
+                style: TextButton.styleFrom(foregroundColor: AppTheme.error),
               ),
             ],
           ),
@@ -641,10 +705,7 @@ class _EditorScreenState extends State<EditorScreen> {
         decoration: BoxDecoration(
           color: AppTheme.background,
           borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
-          border: Border.all(
-            color: AppTheme.border,
-            style: BorderStyle.solid,
-          ),
+          border: Border.all(color: AppTheme.border, style: BorderStyle.solid),
         ),
         child: Column(
           children: [
@@ -656,10 +717,7 @@ class _EditorScreenState extends State<EditorScreen> {
             const SizedBox(height: AppTheme.spacingSM),
             Text(
               lang == 'ko' ? '로고 또는 이미지 업로드' : 'Upload logo or image',
-              style: TextStyle(
-                fontSize: 14,
-                color: AppTheme.textSecondary,
-              ),
+              style: TextStyle(fontSize: 14, color: AppTheme.textSecondary),
             ),
           ],
         ),
@@ -668,6 +726,9 @@ class _EditorScreenState extends State<EditorScreen> {
   }
 
   Future<void> _pickSignatureImage(PosterProvider provider) async {
+    final locale = context.read<LocaleProvider>();
+    final lang = locale.locale.languageCode;
+
     try {
       final XFile? image = await _imagePicker.pickImage(
         source: ImageSource.gallery,
@@ -679,8 +740,40 @@ class _EditorScreenState extends State<EditorScreen> {
         provider.setSignatureImage(bytes);
       }
     } catch (e) {
-      debugPrint('Error picking signature image: $e');
+      if (mounted) {
+        _showErrorSnackBar(AppTranslations.get('error_image_pick', lang));
+      }
     }
+  }
+
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: const Icon(
+                Icons.error_outline_rounded,
+                color: Colors.white,
+                size: 18,
+              ),
+            ),
+            const SizedBox(width: AppTheme.spacingSM),
+            Expanded(child: Text(message)),
+          ],
+        ),
+        backgroundColor: AppTheme.error,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+        ),
+      ),
+    );
   }
 
   Widget _buildBottomButton(BuildContext context, String lang) {
@@ -701,12 +794,10 @@ class _EditorScreenState extends State<EditorScreen> {
         onPressed: () => _handlePreview(lang),
         icon: Icons.visibility_rounded,
       ),
-    )
-        .animate()
-        .fadeIn(
-          delay: const Duration(milliseconds: 550),
-          duration: const Duration(milliseconds: 400),
-        );
+    ).animate().fadeIn(
+      delay: const Duration(milliseconds: 550),
+      duration: const Duration(milliseconds: 400),
+    );
   }
 
   void _handlePreview(String lang) {
@@ -734,11 +825,7 @@ class _EditorScreenState extends State<EditorScreen> {
       SnackBar(
         content: Row(
           children: [
-            Icon(
-              Icons.error_outline_rounded,
-              color: Colors.white,
-              size: 20,
-            ),
+            Icon(Icons.error_outline_rounded, color: Colors.white, size: 20),
             const SizedBox(width: AppTheme.spacingSM),
             Expanded(child: Text(message)),
           ],

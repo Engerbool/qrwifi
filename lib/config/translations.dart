@@ -1,80 +1,41 @@
 class AppTranslations {
   static const Map<String, Map<String, String>> _translations = {
     // Login Screen
-    'app_title': {
-      'en': 'WiFi QR\nPoster',
-      'ko': 'WiFi QR\n포스터',
-    },
+    'app_title': {'en': 'Our Shop\nWiFi', 'ko': '우리가게\nWiFi'},
     'app_subtitle': {
       'en': 'Create beautiful WiFi posters\nfor your business in seconds',
       'ko': '몇 초만에 멋진 WiFi 포스터를\n만들어보세요',
     },
-    'feature_wifi': {
-      'en': 'Enter WiFi details',
-      'ko': 'WiFi 정보 입력',
-    },
-    'feature_template': {
-      'en': 'Choose a template',
-      'ko': '템플릿 선택',
-    },
+    'feature_wifi': {'en': 'Enter WiFi details', 'ko': 'WiFi 정보 입력'},
+    'feature_template': {'en': 'Choose a template', 'ko': '템플릿 선택'},
     'feature_download': {
       'en': 'Download printable poster',
       'ko': '인쇄용 포스터 다운로드',
     },
-    'poster_size': {
-      'en': 'Poster Size',
-      'ko': '포스터 크기',
-    },
-    'continue_google': {
-      'en': 'Continue with Google',
-      'ko': 'Google로 계속하기',
-    },
+    'poster_size': {'en': 'Poster Size', 'ko': '포스터 크기'},
+    'continue_google': {'en': 'Continue with Google', 'ko': 'Google로 계속하기'},
     'terms_notice': {
       'en': 'By continuing, you agree to our Terms and Privacy Policy',
       'ko': '계속하면 이용약관 및 개인정보처리방침에 동의하게 됩니다',
     },
 
     // Home Screen
-    'home_title': {
-      'en': 'WiFi QR\nPoster',
-      'ko': 'WiFi QR\n포스터',
-    },
-    'create_new': {
-      'en': 'Create New\nPoster',
-      'ko': '새 포스터\n만들기',
-    },
+    'home_title': {'en': 'Our Shop\nWiFi', 'ko': '우리가게\nWiFi'},
+    'create_new': {'en': 'Create New\nPoster', 'ko': '새 포스터\n만들기'},
     'create_description': {
-      'en': 'Enter WiFi info and get a printable QR poster',
-      'ko': 'WiFi 정보를 입력하고 인쇄용 QR 포스터를 받으세요',
+      'en': 'Create a WiFi QR code poster in just 1 minute',
+      'ko': '1분이면 WiFi QR 코드 포스터를 만들어요',
     },
-    'how_it_works': {
-      'en': 'How it works',
-      'ko': '사용 방법',
-    },
-    'step1_title': {
-      'en': 'Enter WiFi info',
-      'ko': 'WiFi 정보 입력',
-    },
+    'how_it_works': {'en': 'How it works', 'ko': '사용 방법'},
+    'step1_title': {'en': 'Enter WiFi info', 'ko': 'WiFi 정보 입력'},
     'step1_subtitle': {
       'en': 'Network name and password',
       'ko': '네트워크 이름과 비밀번호',
     },
-    'step2_title': {
-      'en': 'Choose template',
-      'ko': '템플릿 선택',
-    },
-    'step2_subtitle': {
-      'en': 'Pick a design style',
-      'ko': '디자인 스타일 선택',
-    },
-    'step3_title': {
-      'en': 'Download poster',
-      'ko': '포스터 다운로드',
-    },
-    'step3_subtitle': {
-      'en': 'Get your printable file',
-      'ko': '인쇄용 파일 받기',
-    },
+    'step2_title': {'en': 'Choose template', 'ko': '템플릿 선택'},
+    'step2_subtitle': {'en': 'Pick a design style', 'ko': '디자인 스타일 선택'},
+    'step3_title': {'en': 'Download poster', 'ko': '포스터 다운로드'},
+    'step3_subtitle': {'en': 'Get your printable file', 'ko': '인쇄용 파일 받기'},
     'info1': {
       'en': 'Completely free, use without worry',
       'ko': '완전 무료니까 걱정 없이 사용하세요',
@@ -87,48 +48,18 @@ class AppTranslations {
       'en': 'You can apply various templates',
       'ko': '여러가지 템플릿을 적용할 수 있어요',
     },
-    'cancel': {
-      'en': 'Cancel',
-      'ko': '취소',
-    },
+    'cancel': {'en': 'Cancel', 'ko': '취소'},
 
     // Editor Screen
-    'create_poster': {
-      'en': 'Create Poster',
-      'ko': '포스터 만들기',
-    },
-    'wifi_network': {
-      'en': 'WiFi Network',
-      'ko': 'WiFi 네트워크',
-    },
-    'network_name': {
-      'en': 'Network name (SSID)',
-      'ko': '네트워크 이름 (SSID)',
-    },
-    'password': {
-      'en': 'Password',
-      'ko': '비밀번호',
-    },
-    'security': {
-      'en': 'Security',
-      'ko': '보안 유형',
-    },
-    'template': {
-      'en': 'Template',
-      'ko': '템플릿',
-    },
-    'center_icon': {
-      'en': 'Center Icon',
-      'ko': '중앙 아이콘',
-    },
-    'upload_custom': {
-      'en': 'Upload custom icon',
-      'ko': '커스텀 아이콘 업로드',
-    },
-    'custom_message': {
-      'en': 'Custom Message (optional)',
-      'ko': '커스텀 메시지 (선택)',
-    },
+    'create_poster': {'en': 'Create Poster', 'ko': '포스터 만들기'},
+    'wifi_network': {'en': 'WiFi Network', 'ko': 'WiFi 네트워크'},
+    'network_name': {'en': 'Network name (SSID)', 'ko': '네트워크 이름 (SSID)'},
+    'password': {'en': 'Password', 'ko': '비밀번호'},
+    'security': {'en': 'Security', 'ko': '보안 유형'},
+    'template': {'en': 'Template', 'ko': '템플릿'},
+    'center_icon': {'en': 'Center Icon', 'ko': '중앙 아이콘'},
+    'upload_custom': {'en': 'Upload custom icon', 'ko': '커스텀 아이콘 업로드'},
+    'custom_message': {'en': 'Custom Message (optional)', 'ko': '커스텀 메시지 (선택)'},
     'message_hint': {
       'en': 'e.g., Welcome to our cafe!',
       'ko': '예: 카페에 오신 것을 환영합니다!',
@@ -137,75 +68,83 @@ class AppTranslations {
       'en': 'Show password on poster',
       'ko': '포스터에 비밀번호 표시',
     },
-    'preview_poster': {
-      'en': 'Preview Poster',
-      'ko': '포스터 미리보기',
-    },
+    'preview_poster': {'en': 'Preview Poster', 'ko': '포스터 미리보기'},
     'enter_network_name': {
       'en': 'Please enter network name',
       'ko': '네트워크 이름을 입력하세요',
     },
 
     // Preview Screen
-    'preview': {
-      'en': 'Preview',
-      'ko': '미리보기',
-    },
-    'ready_download': {
-      'en': 'Ready to download',
-      'ko': '다운로드 준비 완료',
-    },
-    'download_poster': {
-      'en': 'Download Poster',
-      'ko': '포스터 다운로드',
-    },
-    'edit': {
-      'en': 'Edit',
-      'ko': '수정',
-    },
-    'saving': {
-      'en': 'Saving...',
-      'ko': '저장 중...',
-    },
+    'preview': {'en': 'Preview', 'ko': '미리보기'},
+    'ready_download': {'en': 'Ready to download', 'ko': '다운로드 준비 완료'},
+    'download_poster': {'en': 'Download Poster', 'ko': '포스터 다운로드'},
+    'edit': {'en': 'Edit', 'ko': '수정'},
+    'saving': {'en': 'Saving...', 'ko': '저장 중...'},
     'saved_success': {
       'en': 'Poster saved successfully!',
       'ko': '포스터가 저장되었습니다!',
     },
-    'save_failed': {
-      'en': 'Failed to save poster',
-      'ko': '포스터 저장에 실패했습니다',
-    },
-    'poster_ready': {
-      'en': 'Your poster is ready!',
-      'ko': '포스터가 준비되었습니다!',
-    },
-    'edit_poster': {
-      'en': 'Edit Poster',
-      'ko': '포스터 수정',
-    },
+    'save_failed': {'en': 'Failed to save poster', 'ko': '포스터 저장에 실패했습니다'},
+    'poster_ready': {'en': 'Your poster is ready!', 'ko': '포스터가 준비되었습니다!'},
+    'edit_poster': {'en': 'Edit Poster', 'ko': '포스터 수정'},
 
     // Poster Canvas
-    'free_wifi': {
-      'en': 'FREE WiFi',
-      'ko': '무료 WiFi',
-    },
+    'free_wifi': {'en': 'FREE WiFi', 'ko': '무료 WiFi'},
     'scan_qr': {
       'en': 'Scan the QR code with your phone camera',
       'ko': '휴대폰 카메라로 QR 코드를 스캔하세요',
     },
-    'network': {
-      'en': 'Network',
-      'ko': '네트워크',
-    },
+    'network': {'en': 'Network', 'ko': '네트워크'},
 
     // Common
-    'user': {
-      'en': 'User',
-      'ko': '사용자',
+    'user': {'en': 'User', 'ko': '사용자'},
+
+    // Property Panel
+    'position': {'en': 'Position', 'ko': '위치'},
+    'size': {'en': 'Size', 'ko': '크기'},
+    'color': {'en': 'Color', 'ko': '색상'},
+    'text_color': {'en': 'Text Color', 'ko': '텍스트 색상'},
+    'qr_foreground': {'en': 'QR Foreground', 'ko': 'QR 전경색'},
+    'qr_background': {'en': 'QR Background', 'ko': 'QR 배경색'},
+    'font': {'en': 'Font', 'ko': '글씨체'},
+    'icon_color': {'en': 'Icon Color', 'ko': '아이콘 색상'},
+    'title': {'en': 'Title', 'ko': '제목'},
+    'message': {'en': 'Message', 'ko': '메시지'},
+    'signature': {'en': 'Signature', 'ko': '서명'},
+    'qr_code': {'en': 'QR Code', 'ko': 'QR 코드'},
+    'done': {'en': 'Done', 'ko': '완료'},
+    'edit_layout': {'en': 'Edit Layout', 'ko': '레이아웃 수정'},
+
+    // Error Messages
+    'error_image_pick': {
+      'en': 'Failed to select image',
+      'ko': '이미지 선택에 실패했습니다',
     },
+    'error_export': {
+      'en': 'Failed to save poster',
+      'ko': '포스터 저장에 실패했습니다',
+    },
+    'error_permission_denied': {
+      'en': 'Permission denied. Please allow access in settings.',
+      'ko': '권한이 거부되었습니다. 설정에서 접근을 허용해주세요.',
+    },
+
+    // Confirmation Dialogs
+    'discard_changes': {'en': 'Discard changes?', 'ko': '변경사항을 버리시겠습니까?'},
+    'discard_changes_message': {
+      'en': 'Your work will be lost if you go back.',
+      'ko': '뒤로 가면 작업 내용이 사라집니다.',
+    },
+    'stay': {'en': 'Stay', 'ko': '머무르기'},
+    'discard': {'en': 'Discard', 'ko': '나가기'},
+
+    // Export
+    'exporting': {'en': 'Exporting...', 'ko': '저장 중...'},
   };
 
   static String get(String key, String languageCode) {
-    return _translations[key]?[languageCode] ?? _translations[key]?['en'] ?? key;
+    return _translations[key]?[languageCode] ??
+        _translations[key]?['en'] ??
+        key;
   }
 }

@@ -9,31 +9,31 @@ class AppTheme {
   // ============================================================
   // TOSS COLOR PALETTE - Light Mode
   // ============================================================
-  static const Color primaryLight = Color(0xFF3182F6);       // Toss Blue
-  static const Color backgroundLight = Color(0xFFF4F5F7);    // Light Gray
-  static const Color surfaceLight = Color(0xFFFFFFFF);       // White
-  static const Color textPrimaryLight = Color(0xFF191F28);   // Almost Black
+  static const Color primaryLight = Color(0xFF3182F6); // Toss Blue
+  static const Color backgroundLight = Color(0xFFF4F5F7); // Light Gray
+  static const Color surfaceLight = Color(0xFFFFFFFF); // White
+  static const Color textPrimaryLight = Color(0xFF191F28); // Almost Black
   static const Color textSecondaryLight = Color(0xFF8B95A1); // Medium Gray
-  static const Color textTertiaryLight = Color(0xFFB0B8C1);  // Light Gray
-  static const Color borderLight = Color(0xFFE5E8EB);        // Subtle border
+  static const Color textTertiaryLight = Color(0xFFB0B8C1); // Light Gray
+  static const Color borderLight = Color(0xFFE5E8EB); // Subtle border
 
   // ============================================================
   // TOSS COLOR PALETTE - Dark Mode
   // ============================================================
-  static const Color primaryDark = Color(0xFF4A9DFF);        // Brighter Blue for dark
-  static const Color backgroundDark = Color(0xFF17171C);     // Dark background
-  static const Color surfaceDark = Color(0xFF1F1F26);        // Dark surface
-  static const Color textPrimaryDark = Color(0xFFF2F4F6);    // Almost White
-  static const Color textSecondaryDark = Color(0xFF9CA3AF);  // Medium Gray
-  static const Color textTertiaryDark = Color(0xFF6B7280);   // Darker Gray
-  static const Color borderDark = Color(0xFF2D2D35);         // Dark border
+  static const Color primaryDark = Color(0xFF4A9DFF); // Brighter Blue for dark
+  static const Color backgroundDark = Color(0xFF17171C); // Dark background
+  static const Color surfaceDark = Color(0xFF1F1F26); // Dark surface
+  static const Color textPrimaryDark = Color(0xFFF2F4F6); // Almost White
+  static const Color textSecondaryDark = Color(0xFF9CA3AF); // Medium Gray
+  static const Color textTertiaryDark = Color(0xFF6B7280); // Darker Gray
+  static const Color borderDark = Color(0xFF2D2D35); // Dark border
 
   // ============================================================
   // SHARED COLORS
   // ============================================================
-  static const Color success = Color(0xFF00C471);       // Toss Green
-  static const Color error = Color(0xFFF04452);         // Toss Red
-  static const Color warning = Color(0xFFFF9500);       // Orange
+  static const Color success = Color(0xFF00C471); // Toss Green
+  static const Color error = Color(0xFFF04452); // Toss Red
+  static const Color warning = Color(0xFFFF9500); // Orange
 
   // ============================================================
   // DYNAMIC COLORS (Use these in widgets)
@@ -147,7 +147,9 @@ class AppTheme {
       bottomSheetTheme: const BottomSheetThemeData(
         backgroundColor: surfaceLight,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(radiusLarge)),
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(radiusLarge),
+          ),
         ),
       ),
       dialogTheme: DialogThemeData(
@@ -203,7 +205,9 @@ class AppTheme {
       bottomSheetTheme: const BottomSheetThemeData(
         backgroundColor: surfaceDark,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(radiusLarge)),
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(radiusLarge),
+          ),
         ),
       ),
       dialogTheme: DialogThemeData(
@@ -368,10 +372,7 @@ class AppTheme {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(radiusSmall),
         ),
-        textStyle: GoogleFonts.inter(
-          fontSize: 15,
-          fontWeight: FontWeight.w600,
-        ),
+        textStyle: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600),
       ),
     );
   }
@@ -385,10 +386,7 @@ class AppTheme {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(radiusSmall),
         ),
-        textStyle: GoogleFonts.inter(
-          fontSize: 15,
-          fontWeight: FontWeight.w600,
-        ),
+        textStyle: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600),
       ),
     );
   }
@@ -401,10 +399,7 @@ class AppTheme {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(radiusSmall),
         ),
-        textStyle: GoogleFonts.inter(
-          fontSize: 15,
-          fontWeight: FontWeight.w600,
-        ),
+        textStyle: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600),
       ),
     );
   }
@@ -429,7 +424,10 @@ class AppTheme {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(radiusSmall),
-        borderSide: BorderSide(color: isDark ? primaryDark : primaryLight, width: 1.5),
+        borderSide: BorderSide(
+          color: isDark ? primaryDark : primaryLight,
+          width: 1.5,
+        ),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(radiusSmall),
@@ -443,7 +441,10 @@ class AppTheme {
       hintStyle: GoogleFonts.inter(color: hintColor, fontSize: 15),
       prefixIconColor: labelColor,
       suffixIconColor: labelColor,
-      floatingLabelStyle: GoogleFonts.inter(color: isDark ? primaryDark : primaryLight, fontSize: 14),
+      floatingLabelStyle: GoogleFonts.inter(
+        color: isDark ? primaryDark : primaryLight,
+        fontSize: 14,
+      ),
     );
   }
 
@@ -482,9 +483,7 @@ class AppTheme {
         return Colors.transparent;
       }),
       checkColor: WidgetStateProperty.all(Colors.white),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(4),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
       side: BorderSide(color: isDark ? borderDark : borderLight, width: 1.5),
     );
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../config/constants.dart';
 import '../config/translations.dart';
+import '../models/poster_element.dart';
 import '../providers/locale_provider.dart';
 import '../providers/poster_provider.dart';
 import 'font_picker.dart';
@@ -28,6 +29,7 @@ class PosterCanvas extends StatelessWidget {
       builder: (context, provider, child) {
         final template = provider.selectedTemplate;
         final size = provider.selectedSize;
+        final hasEditedElements = provider.elements.isNotEmpty;
 
         return RepaintBoundary(
           key: posterKey,
@@ -35,14 +37,146 @@ class PosterCanvas extends StatelessWidget {
             aspectRatio: size.aspectRatio,
             child: Container(
               decoration: template.backgroundDecoration,
-              child: size.type == PosterSizeType.businessCard
-                  ? _buildBusinessCardLayout(context, provider, lang)
-                  : _buildA4Layout(context, provider, lang),
+              child: hasEditedElements
+                  ? _buildFromElements(context, provider, lang)
+                  : (size.type == PosterSizeType.businessCard
+                      ? _buildBusinessCardLayout(context, provider, lang)
+                      : _buildA4Layout(context, provider, lang)),
             ),
           ),
         );
       },
     );
+  }
+
+  /// Build poster from edited elements
+  Widget _buildFromElements(
+    BuildContext context,
+    PosterProvider provider,
+    String lang,
+  ) {
+    final size = provider.selectedSize;
+    final elements = provider.sortedElements;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final canvasWidth = constraints.maxWidth;
+        final canvasHeight = constraints.maxHeight;
+
+        // Calculate scale from canvas coordinates to display coordinates
+        final scaleX = canvasWidth / size.widthPx;
+        final scaleY = canvasHeight / size.heightPx;
+        final scale = scaleX < scaleY ? scaleX : scaleY;
+
+        return Stack(
+          children: elements.map((element) {
+            return Positioned(
+              left: element.x * scale,
+              top: element.y * scale,
+              width: element.width * scale,
+              height: element.height * scale,
+              child: _buildElementContent(context, provider, element, scale, lang),
+            );
+          }).toList(),
+        );
+      },
+    );
+  }
+
+  /// Build content for a single element
+  Widget _buildElementContent(
+    BuildContext context,
+    PosterProvider provider,
+    PosterElement element,
+    double scale,
+    String lang,
+  ) {
+    switch (element.type) {
+      case ElementType.qrCode:
+        return QrWidget(
+          data: provider.wifiConfig.toQrString(),
+          size: element.width * scale,
+          backgroundColor: element.backgroundColor ?? Colors.white,
+          foregroundColor: element.textColor ?? Colors.black,
+          iconId: provider.selectedIconPath,
+          customIconData: provider.customIconData,
+        );
+
+      case ElementType.title:
+        final displayText = element.content ??
+            (provider.posterTitle.isNotEmpty
+                ? provider.posterTitle
+                : AppTranslations.get('free_wifi', lang));
+        return FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            displayText,
+            style: FontPicker.getStyleById(
+              element.fontFamily ?? provider.selectedFont,
+              fontSize: (element.fontSize ?? 24) * scale,
+              fontWeight: FontWeight.bold,
+              color: element.textColor ?? Colors.black,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        );
+
+      case ElementType.message:
+        return Center(
+          child: Text(
+            element.content ?? '',
+            style: FontPicker.getStyleById(
+              element.fontFamily ?? 'noto',
+              fontSize: (element.fontSize ?? 16) * scale,
+              fontWeight: FontWeight.w500,
+              color: element.textColor ?? Colors.black,
+            ),
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        );
+
+      case ElementType.ssidPassword:
+        return Center(
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              element.content ?? '',
+              style: FontPicker.getStyleById(
+                element.fontFamily ?? 'noto',
+                fontSize: (element.fontSize ?? 14) * scale,
+                fontWeight: FontWeight.w500,
+                color: element.textColor ?? Colors.black,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        );
+
+      case ElementType.signature:
+        return Center(
+          child: Text(
+            element.content ?? '',
+            style: FontPicker.getStyleById(
+              element.fontFamily ?? 'noto',
+              fontSize: (element.fontSize ?? 16) * scale,
+              fontWeight: FontWeight.w600,
+              color: element.textColor ?? Colors.black,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        );
+
+      case ElementType.wifiIcon:
+        return Center(
+          child: Icon(
+            Icons.wifi,
+            size: element.width * scale * 0.8,
+            color: element.textColor ?? Colors.black,
+          ),
+        );
+    }
   }
 
   /// A4 vertical layout (original layout)
@@ -70,11 +204,7 @@ class PosterCanvas extends StatelessWidget {
               const Spacer(flex: 1),
 
               // WiFi Icon and Title
-              Icon(
-                Icons.wifi,
-                size: width * 0.10,
-                color: template.textColor,
-              ),
+              Icon(Icons.wifi, size: width * 0.10, color: template.textColor),
               SizedBox(height: width * 0.02),
               Text(
                 provider.posterTitle.isNotEmpty
@@ -119,31 +249,40 @@ class PosterCanvas extends StatelessWidget {
               // Password display (optional)
               if (showPassword) ...[
                 SizedBox(height: width * 0.025),
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'ID: ${provider.ssid}',
-                      style: FontPicker.getStyleById(
-                        provider.selectedFont,
-                        fontSize: passwordSize,
-                        fontWeight: FontWeight.w500,
-                        color: template.textColor.withValues(alpha: 0.8),
+                ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: width * 0.85),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          'ID: ${provider.ssid}',
+                          style: FontPicker.getStyleById(
+                            provider.selectedFont,
+                            fontSize: passwordSize,
+                            fontWeight: FontWeight.w500,
+                            color: template.textColor.withValues(alpha: 0.8),
+                          ),
+                        ),
                       ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    SizedBox(height: width * 0.008),
-                    Text(
-                      'PW: ${provider.password}',
-                      style: FontPicker.getStyleById(
-                        provider.selectedFont,
-                        fontSize: passwordSize,
-                        fontWeight: FontWeight.w500,
-                        color: template.textColor.withValues(alpha: 0.8),
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
+                      if (provider.password.isNotEmpty) ...[
+                        SizedBox(height: width * 0.008),
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            'PW: ${provider.password}',
+                            style: FontPicker.getStyleById(
+                              provider.selectedFont,
+                              fontSize: passwordSize,
+                              fontWeight: FontWeight.w500,
+                              color: template.textColor.withValues(alpha: 0.8),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
                 ),
               ],
 
@@ -251,7 +390,8 @@ class PosterCanvas extends StatelessWidget {
 
                     // Signature (aligned with QR bottom)
                     if (provider.hasSignature)
-                      if (provider.useSignatureImage && provider.hasSignatureImage)
+                      if (provider.useSignatureImage &&
+                          provider.hasSignatureImage)
                         Container(
                           constraints: BoxConstraints(
                             maxHeight: height * 0.22,

@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 
 /// Template category for grouping
 enum TemplateCategory {
-  basic,      // 기본
-  warm,       // 따뜻한 색
-  cool,       // 차가운 색
-  nature,     // 자연
-  creative,   // 크리에이티브
+  basic, // 기본
+  warm, // 따뜻한 색
+  cool, // 차가운 색
+  nature, // 자연
+  creative, // 크리에이티브
 }
 
 /// Model representing a poster template design
@@ -75,11 +75,36 @@ class PosterTemplates {
 
   // Category definitions
   static const List<CategoryInfo> categories = [
-    CategoryInfo(category: TemplateCategory.basic, name: 'Basic', nameKo: '기본', icon: Icons.square_rounded),
-    CategoryInfo(category: TemplateCategory.warm, name: 'Warm', nameKo: '따뜻한', icon: Icons.wb_sunny_rounded),
-    CategoryInfo(category: TemplateCategory.cool, name: 'Cool', nameKo: '차가운', icon: Icons.ac_unit_rounded),
-    CategoryInfo(category: TemplateCategory.nature, name: 'Nature', nameKo: '자연', icon: Icons.eco_rounded),
-    CategoryInfo(category: TemplateCategory.creative, name: 'Creative', nameKo: '크리에이티브', icon: Icons.auto_awesome_rounded),
+    CategoryInfo(
+      category: TemplateCategory.basic,
+      name: 'Basic',
+      nameKo: '기본',
+      icon: Icons.square_rounded,
+    ),
+    CategoryInfo(
+      category: TemplateCategory.warm,
+      name: 'Warm',
+      nameKo: '따뜻한',
+      icon: Icons.wb_sunny_rounded,
+    ),
+    CategoryInfo(
+      category: TemplateCategory.cool,
+      name: 'Cool',
+      nameKo: '차가운',
+      icon: Icons.ac_unit_rounded,
+    ),
+    CategoryInfo(
+      category: TemplateCategory.nature,
+      name: 'Nature',
+      nameKo: '자연',
+      icon: Icons.eco_rounded,
+    ),
+    CategoryInfo(
+      category: TemplateCategory.creative,
+      name: 'Creative',
+      nameKo: '크리에이티브',
+      icon: Icons.auto_awesome_rounded,
+    ),
   ];
 
   // ============ BASIC ============
@@ -389,9 +414,6 @@ class PosterTemplates {
   }
 
   static PosterTemplate getById(String id) {
-    return all.firstWhere(
-      (t) => t.id == id,
-      orElse: () => minimal,
-    );
+    return all.firstWhere((t) => t.id == id, orElse: () => minimal);
   }
 }

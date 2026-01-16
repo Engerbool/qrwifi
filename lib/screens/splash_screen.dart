@@ -53,16 +53,14 @@ class _SplashScreenState extends State<SplashScreen> {
               const SizedBox(height: AppTheme.spacingLG),
               // App name
               Text(
-                'WiFi QR',
-                style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
-              )
-                  .animate()
-                  .fadeIn(
-                    delay: const Duration(milliseconds: 200),
-                    duration: const Duration(milliseconds: 400),
-                  ),
+                '우리가게 와이파이',
+                style: Theme.of(
+                  context,
+                ).textTheme.displaySmall?.copyWith(fontWeight: FontWeight.w800),
+              ).animate().fadeIn(
+                delay: const Duration(milliseconds: 200),
+                duration: const Duration(milliseconds: 400),
+              ),
               const Spacer(flex: 3),
               // Loading indicator - minimal
               SizedBox(
@@ -72,12 +70,10 @@ class _SplashScreenState extends State<SplashScreen> {
                   strokeWidth: 2.5,
                   color: AppTheme.primary,
                 ),
-              )
-                  .animate()
-                  .fadeIn(
-                    delay: const Duration(milliseconds: 600),
-                    duration: const Duration(milliseconds: 300),
-                  ),
+              ).animate().fadeIn(
+                delay: const Duration(milliseconds: 600),
+                duration: const Duration(milliseconds: 300),
+              ),
               const SizedBox(height: AppTheme.spacingXXL),
             ],
           ),
@@ -94,11 +90,7 @@ class _SplashScreenState extends State<SplashScreen> {
         color: AppTheme.primary,
         borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
       ),
-      child: const Icon(
-        Icons.qr_code_2_rounded,
-        size: 48,
-        color: Colors.white,
-      ),
+      child: const Icon(Icons.qr_code_2_rounded, size: 48, color: Colors.white),
     );
   }
 }

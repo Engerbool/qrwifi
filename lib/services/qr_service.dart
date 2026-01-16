@@ -56,10 +56,7 @@ class QrService {
     required String encryption,
   }) {
     if (ssid.isEmpty) {
-      return ValidationResult(
-        isValid: false,
-        error: 'SSID cannot be empty',
-      );
+      return ValidationResult(isValid: false, error: 'SSID cannot be empty');
     }
 
     if (ssid.length > 32) {
@@ -92,8 +89,5 @@ class ValidationResult {
   final bool isValid;
   final String? error;
 
-  ValidationResult({
-    required this.isValid,
-    this.error,
-  });
+  ValidationResult({required this.isValid, this.error});
 }

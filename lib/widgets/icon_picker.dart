@@ -1,9 +1,13 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../config/theme.dart';
+import '../config/translations.dart';
+import '../providers/locale_provider.dart';
 import '../providers/poster_provider.dart';
+import '../utils/responsive.dart';
 
 /// Preset icons available for QR code center
 class PresetIcon {
@@ -11,11 +15,7 @@ class PresetIcon {
   final String name;
   final IconData icon;
 
-  const PresetIcon({
-    required this.id,
-    required this.name,
-    required this.icon,
-  });
+  const PresetIcon({required this.id, required this.name, required this.icon});
 }
 
 class IconPicker extends StatelessWidget {
@@ -25,7 +25,11 @@ class IconPicker extends StatelessWidget {
     PresetIcon(id: 'none', name: '없음', icon: Icons.block_rounded),
     PresetIcon(id: 'wifi', name: 'WiFi', icon: Icons.wifi_rounded),
     PresetIcon(id: 'coffee', name: 'Coffee', icon: Icons.coffee_rounded),
-    PresetIcon(id: 'restaurant', name: 'Restaurant', icon: Icons.restaurant_rounded),
+    PresetIcon(
+      id: 'restaurant',
+      name: 'Restaurant',
+      icon: Icons.restaurant_rounded,
+    ),
     PresetIcon(id: 'local_bar', name: 'Bar', icon: Icons.local_bar_rounded),
     PresetIcon(id: 'store', name: 'Store', icon: Icons.storefront_rounded),
     PresetIcon(id: 'hotel', name: 'Hotel', icon: Icons.hotel_rounded),
@@ -40,8 +44,8 @@ class IconPicker extends StatelessWidget {
         return GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 4,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: Responsive.gridCrossAxisCount(context, mobileCount: 4),
             mainAxisSpacing: AppTheme.spacingSM,
             crossAxisSpacing: AppTheme.spacingSM,
             childAspectRatio: 1,
@@ -50,7 +54,8 @@ class IconPicker extends StatelessWidget {
           itemBuilder: (context, index) {
             if (index < presetIcons.length) {
               final preset = presetIcons[index];
-              final isSelected = provider.selectedIconPath == preset.id &&
+              final isSelected =
+                  provider.selectedIconPath == preset.id &&
                   !provider.hasCustomIcon;
 
               return _IconCard(
@@ -58,7 +63,7 @@ class IconPicker extends StatelessWidget {
                 label: preset.name,
                 isSelected: isSelected,
                 onTap: () {
-                  HapticFeedback.lightImpact();
+                  if (!kIsWeb) HapticFeedback.lightImpact();
                   provider.setIconPath(preset.id);
                 },
               );
@@ -80,6 +85,8 @@ class IconPicker extends StatelessWidget {
 
   Future<void> _pickCustomIcon(BuildContext context) async {
     final picker = ImagePicker();
+    final locale = context.read<LocaleProvider>();
+    final lang = locale.locale.languageCode;
 
     try {
       final XFile? image = await picker.pickImage(
@@ -99,9 +106,15 @@ class IconPicker extends StatelessWidget {
           SnackBar(
             content: Row(
               children: [
-                const Icon(Icons.error_outline_rounded, color: Colors.white, size: 18),
+                const Icon(
+                  Icons.error_outline_rounded,
+                  color: Colors.white,
+                  size: 18,
+                ),
                 const SizedBox(width: AppTheme.spacingSM),
-                Expanded(child: Text('Failed to pick image: $e')),
+                Expanded(
+                  child: Text(AppTranslations.get('error_image_pick', lang)),
+                ),
               ],
             ),
             backgroundColor: AppTheme.error,
@@ -116,7 +129,7 @@ class IconPicker extends StatelessWidget {
   }
 }
 
-class _IconCard extends StatelessWidget {
+class _IconCard extends StatefulWidget {
   final IconData icon;
   final String label;
   final bool isSelected;
@@ -130,49 +143,76 @@ class _IconCard extends StatelessWidget {
   });
 
   @override
+  State<_IconCard> createState() => _IconCardState();
+}
+
+class _IconCardState extends State<_IconCard> {
+  bool _isHovered = false;
+
+  @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppTheme.primary.withValues(alpha: 0.1)
-              : AppTheme.surface,
-          borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-          border: Border.all(
-            color: isSelected ? AppTheme.primary : AppTheme.border,
-            width: isSelected ? 2 : 1,
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          transform: _isHovered && !widget.isSelected
+              ? (Matrix4.identity()..scale(1.05))
+              : Matrix4.identity(),
+          transformAlignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: widget.isSelected
+                ? AppTheme.primary.withValues(alpha: 0.1)
+                : _isHovered
+                    ? AppTheme.primary.withValues(alpha: 0.05)
+                    : AppTheme.surface,
+            borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+            border: Border.all(
+              color: widget.isSelected
+                  ? AppTheme.primary
+                  : _isHovered
+                      ? AppTheme.primary.withValues(alpha: 0.5)
+                      : AppTheme.border,
+              width: widget.isSelected ? 2 : 1,
+            ),
+            boxShadow: _isHovered ? AppTheme.cardShadow : null,
           ),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              child: Icon(
-                icon,
-                size: isSelected ? 28 : 24,
-                color: isSelected ? AppTheme.primary : AppTheme.textSecondary,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                child: Icon(
+                  widget.icon,
+                  size: widget.isSelected || _isHovered ? 28 : 24,
+                  color: widget.isSelected || _isHovered
+                      ? AppTheme.primary
+                      : AppTheme.textSecondary,
+                ),
               ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                color: isSelected ? AppTheme.primary : AppTheme.textSecondary,
+              const SizedBox(height: 4),
+              Text(
+                widget.label,
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: widget.isSelected ? FontWeight.w600 : FontWeight.w500,
+                  color: widget.isSelected || _isHovered
+                      ? AppTheme.primary
+                      : AppTheme.textSecondary,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-class _UploadCard extends StatelessWidget {
+class _UploadCard extends StatefulWidget {
   final bool hasCustomIcon;
   final VoidCallback onTap;
   final VoidCallback? onClear;
@@ -184,67 +224,103 @@ class _UploadCard extends StatelessWidget {
   });
 
   @override
+  State<_UploadCard> createState() => _UploadCardState();
+}
+
+class _UploadCardState extends State<_UploadCard> {
+  bool _isHovered = false;
+
+  @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        decoration: BoxDecoration(
-          color: hasCustomIcon
-              ? AppTheme.success.withValues(alpha: 0.1)
-              : AppTheme.surface,
-          borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-          border: Border.all(
-            color: hasCustomIcon ? AppTheme.success : AppTheme.border,
-            width: hasCustomIcon ? 2 : 1,
-          ),
-        ),
-        child: Stack(
-          children: [
-            Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    hasCustomIcon
-                        ? Icons.check_circle_rounded
-                        : Icons.add_photo_alternate_rounded,
-                    size: hasCustomIcon ? 28 : 24,
-                    color: hasCustomIcon ? AppTheme.success : AppTheme.textSecondary,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    hasCustomIcon ? 'Custom' : 'Upload',
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: hasCustomIcon ? FontWeight.w600 : FontWeight.w500,
-                      color: hasCustomIcon ? AppTheme.success : AppTheme.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          transform: _isHovered && !widget.hasCustomIcon
+              ? (Matrix4.identity()..scale(1.05))
+              : Matrix4.identity(),
+          transformAlignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: widget.hasCustomIcon
+                ? AppTheme.success.withValues(alpha: 0.1)
+                : _isHovered
+                    ? AppTheme.primary.withValues(alpha: 0.05)
+                    : AppTheme.surface,
+            borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+            border: Border.all(
+              color: widget.hasCustomIcon
+                  ? AppTheme.success
+                  : _isHovered
+                      ? AppTheme.primary.withValues(alpha: 0.5)
+                      : AppTheme.border,
+              width: widget.hasCustomIcon ? 2 : 1,
             ),
-            if (hasCustomIcon && onClear != null)
-              Positioned(
-                top: 4,
-                right: 4,
-                child: GestureDetector(
-                  onTap: onClear,
-                  child: Container(
-                    padding: const EdgeInsets.all(3),
-                    decoration: BoxDecoration(
-                      color: AppTheme.error,
-                      shape: BoxShape.circle,
+            boxShadow: _isHovered ? AppTheme.cardShadow : null,
+          ),
+          child: Stack(
+            children: [
+              Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      widget.hasCustomIcon
+                          ? Icons.check_circle_rounded
+                          : Icons.add_photo_alternate_rounded,
+                      size: widget.hasCustomIcon || _isHovered ? 28 : 24,
+                      color: widget.hasCustomIcon
+                          ? AppTheme.success
+                          : _isHovered
+                              ? AppTheme.primary
+                              : AppTheme.textSecondary,
                     ),
-                    child: const Icon(
-                      Icons.close_rounded,
-                      size: 10,
-                      color: Colors.white,
+                    const SizedBox(height: 4),
+                    Text(
+                      widget.hasCustomIcon ? 'Custom' : 'Upload',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: widget.hasCustomIcon
+                            ? FontWeight.w600
+                            : FontWeight.w500,
+                        color: widget.hasCustomIcon
+                            ? AppTheme.success
+                            : _isHovered
+                                ? AppTheme.primary
+                                : AppTheme.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (widget.hasCustomIcon && widget.onClear != null)
+                Positioned(
+                  top: 4,
+                  right: 4,
+                  child: MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    child: GestureDetector(
+                      onTap: widget.onClear,
+                      child: Container(
+                        padding: const EdgeInsets.all(3),
+                        decoration: BoxDecoration(
+                          color: AppTheme.error,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.close_rounded,
+                          size: 10,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );

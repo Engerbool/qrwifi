@@ -52,30 +52,24 @@ class LoginScreen extends StatelessWidget {
                     // Title
                     Text(
                       AppTranslations.get('app_title', lang),
-                      style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                            fontWeight: FontWeight.w800,
-                            height: 1.1,
-                          ),
-                    )
-                        .animate()
-                        .fadeIn(
-                          delay: const Duration(milliseconds: 150),
-                          duration: const Duration(milliseconds: 400),
-                        ),
+                      style: Theme.of(context).textTheme.displayMedium
+                          ?.copyWith(fontWeight: FontWeight.w800, height: 1.1),
+                    ).animate().fadeIn(
+                      delay: const Duration(milliseconds: 150),
+                      duration: const Duration(milliseconds: 400),
+                    ),
                     const SizedBox(height: AppTheme.spacingMD),
                     // Subtitle
                     Text(
                       AppTranslations.get('app_subtitle', lang),
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: AppTheme.textSecondary,
-                            height: 1.5,
-                          ),
-                    )
-                        .animate()
-                        .fadeIn(
-                          delay: const Duration(milliseconds: 250),
-                          duration: const Duration(milliseconds: 400),
-                        ),
+                        color: AppTheme.textSecondary,
+                        height: 1.5,
+                      ),
+                    ).animate().fadeIn(
+                      delay: const Duration(milliseconds: 250),
+                      duration: const Duration(milliseconds: 400),
+                    ),
                     const SizedBox(height: AppTheme.spacingXXL),
                     // Features
                     ..._buildFeatures(context, lang),
@@ -130,9 +124,7 @@ class LoginScreen extends StatelessWidget {
           boxShadow: AppTheme.cardShadow,
         ),
         child: Icon(
-          isDark
-              ? Icons.light_mode_rounded
-              : Icons.dark_mode_rounded,
+          isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
           color: AppTheme.textSecondary,
           size: 20,
         ),
@@ -148,11 +140,7 @@ class LoginScreen extends StatelessWidget {
         color: AppTheme.primary,
         borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
       ),
-      child: const Icon(
-        Icons.qr_code_2_rounded,
-        size: 36,
-        color: Colors.white,
-      ),
+      child: const Icon(Icons.qr_code_2_rounded, size: 36, color: Colors.white),
     );
   }
 
@@ -169,40 +157,43 @@ class LoginScreen extends StatelessWidget {
 
       return Padding(
         padding: const EdgeInsets.only(bottom: AppTheme.spacingMD),
-        child: Row(
-          children: [
-            Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: AppTheme.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
-              ),
-              child: Icon(
-                feature.$2,
-                size: 18,
-                color: AppTheme.primary,
-              ),
-            ),
-            const SizedBox(width: AppTheme.spacingMD),
-            Text(
-              feature.$1,
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
-          ],
-        )
-            .animate()
-            .fadeIn(
-              delay: Duration(milliseconds: 350 + (index * 80)),
-              duration: const Duration(milliseconds: 400),
-            )
-            .slideX(
-              begin: -0.1,
-              end: 0,
-              delay: Duration(milliseconds: 350 + (index * 80)),
-              duration: const Duration(milliseconds: 400),
-              curve: Curves.easeOutCubic,
-            ),
+        child:
+            Row(
+                  children: [
+                    Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: AppTheme.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(
+                          AppTheme.radiusSmall,
+                        ),
+                      ),
+                      child: Icon(
+                        feature.$2,
+                        size: 18,
+                        color: AppTheme.primary,
+                      ),
+                    ),
+                    const SizedBox(width: AppTheme.spacingMD),
+                    Text(
+                      feature.$1,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                  ],
+                )
+                .animate()
+                .fadeIn(
+                  delay: Duration(milliseconds: 350 + (index * 80)),
+                  duration: const Duration(milliseconds: 400),
+                )
+                .slideX(
+                  begin: -0.1,
+                  end: 0,
+                  delay: Duration(milliseconds: 350 + (index * 80)),
+                  duration: const Duration(milliseconds: 400),
+                  curve: Curves.easeOutCubic,
+                ),
       );
     }).toList();
   }
@@ -228,32 +219,33 @@ class LoginScreen extends StatelessWidget {
               // Error message
               if (auth.error != null)
                 Container(
-                  width: double.infinity,
-                  margin: const EdgeInsets.only(bottom: AppTheme.spacingMD),
-                  padding: const EdgeInsets.all(AppTheme.spacingMD),
-                  decoration: BoxDecoration(
-                    color: AppTheme.error.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.error_outline_rounded,
-                        color: AppTheme.error,
-                        size: 18,
-                      ),
-                      const SizedBox(width: AppTheme.spacingSM),
-                      Expanded(
-                        child: Text(
-                          auth.error!,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: AppTheme.error,
-                              ),
+                      width: double.infinity,
+                      margin: const EdgeInsets.only(bottom: AppTheme.spacingMD),
+                      padding: const EdgeInsets.all(AppTheme.spacingMD),
+                      decoration: BoxDecoration(
+                        color: AppTheme.error.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(
+                          AppTheme.radiusSmall,
                         ),
                       ),
-                    ],
-                  ),
-                )
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.error_outline_rounded,
+                            color: AppTheme.error,
+                            size: 18,
+                          ),
+                          const SizedBox(width: AppTheme.spacingSM),
+                          Expanded(
+                            child: Text(
+                              auth.error!,
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(color: AppTheme.error),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
                     .animate()
                     .fadeIn(duration: const Duration(milliseconds: 200))
                     .shakeX(hz: 3, amount: 3),
@@ -262,24 +254,20 @@ class LoginScreen extends StatelessWidget {
                 isLoading: auth.isLoading,
                 onPressed: () => _handleGoogleSignIn(context),
                 label: AppTranslations.get('continue_google', lang),
-              )
-                  .animate()
-                  .fadeIn(
-                    delay: const Duration(milliseconds: 600),
-                    duration: const Duration(milliseconds: 400),
-                  ),
+              ).animate().fadeIn(
+                delay: const Duration(milliseconds: 600),
+                duration: const Duration(milliseconds: 400),
+              ),
               const SizedBox(height: AppTheme.spacingMD),
               // Terms
               Text(
                 AppTranslations.get('terms_notice', lang),
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.labelSmall,
-              )
-                  .animate()
-                  .fadeIn(
-                    delay: const Duration(milliseconds: 700),
-                    duration: const Duration(milliseconds: 400),
-                  ),
+              ).animate().fadeIn(
+                delay: const Duration(milliseconds: 700),
+                duration: const Duration(milliseconds: 400),
+              ),
             ],
           );
         },
@@ -319,9 +307,15 @@ class _GoogleSignInButtonState extends State<_GoogleSignInButton> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTapDown: widget.isLoading ? null : (_) => setState(() => _isPressed = true),
-      onTapUp: widget.isLoading ? null : (_) => setState(() => _isPressed = false),
-      onTapCancel: widget.isLoading ? null : () => setState(() => _isPressed = false),
+      onTapDown: widget.isLoading
+          ? null
+          : (_) => setState(() => _isPressed = true),
+      onTapUp: widget.isLoading
+          ? null
+          : (_) => setState(() => _isPressed = false),
+      onTapCancel: widget.isLoading
+          ? null
+          : () => setState(() => _isPressed = false),
       onTap: widget.isLoading ? null : widget.onPressed,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 100),
@@ -332,9 +326,7 @@ class _GoogleSignInButtonState extends State<_GoogleSignInButton> {
           opacity: _isPressed ? 0.7 : 1.0,
           child: Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(
-              vertical: AppTheme.spacingMD,
-            ),
+            padding: const EdgeInsets.symmetric(vertical: AppTheme.spacingMD),
             decoration: BoxDecoration(
               color: AppTheme.surface,
               borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
@@ -375,8 +367,8 @@ class _GoogleSignInButtonState extends State<_GoogleSignInButton> {
                   Text(
                     widget.label,
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          color: AppTheme.textPrimary,
-                        ),
+                      color: AppTheme.textPrimary,
+                    ),
                   ),
                 ],
               ],

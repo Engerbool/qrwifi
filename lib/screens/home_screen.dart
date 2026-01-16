@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
@@ -9,6 +11,7 @@ import '../config/translations.dart';
 import '../providers/locale_provider.dart';
 import '../providers/poster_provider.dart';
 import '../providers/theme_provider.dart';
+import '../utils/responsive.dart';
 import '../widgets/toss_card.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -23,59 +26,64 @@ class HomeScreen extends StatelessWidget {
       backgroundColor: AppTheme.background,
       body: SafeArea(
         child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 패딩이 필요한 섹션들
-              Padding(
-                padding: const EdgeInsets.all(AppTheme.spacingLG),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Header
-                    _buildHeader(context, locale)
-                        .animate()
-                        .fadeIn(duration: const Duration(milliseconds: 300)),
-                    const SizedBox(height: AppTheme.spacingXL),
-                    // Create card
-                    _buildCreateCard(context, lang)
-                        .animate()
-                        .fadeIn(
-                          delay: const Duration(milliseconds: 200),
-                          duration: const Duration(milliseconds: 400),
-                        )
-                        .slideY(
-                          begin: 0.1,
-                          end: 0,
-                          delay: const Duration(milliseconds: 200),
-                          duration: const Duration(milliseconds: 400),
-                          curve: Curves.easeOutCubic,
+          child: Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: Responsive.contentMaxWidth(context),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 패딩이 필요한 섹션들
+                  Padding(
+                    padding: Responsive.screenPadding(context),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Header
+                        _buildHeader(context, locale).animate().fadeIn(
+                          duration: const Duration(milliseconds: 300),
                         ),
-                    const SizedBox(height: AppTheme.spacingXL),
-                    // Info card
-                    _buildInfoCard(context, lang)
-                        .animate()
-                        .fadeIn(
+                        const SizedBox(height: AppTheme.spacingXL),
+                        // Create card
+                        _buildCreateCard(context, lang)
+                            .animate()
+                            .fadeIn(
+                              delay: const Duration(milliseconds: 200),
+                              duration: const Duration(milliseconds: 400),
+                            )
+                            .slideY(
+                              begin: 0.1,
+                              end: 0,
+                              delay: const Duration(milliseconds: 200),
+                              duration: const Duration(milliseconds: 400),
+                              curve: Curves.easeOutCubic,
+                            ),
+                        const SizedBox(height: AppTheme.spacingXL),
+                        // Info card
+                        _buildInfoCard(context, lang).animate().fadeIn(
                           delay: const Duration(milliseconds: 400),
                           duration: const Duration(milliseconds: 400),
                         ),
-                  ],
-                ),
+                      ],
+                    ),
+                  ),
+                  // 캐릭터 섹션 - 최대 너비 제한으로 가독성 확보
+                  Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 600),
+                      child: _buildCharacterConversation(context, lang)
+                          .animate()
+                          .fadeIn(
+                            delay: const Duration(milliseconds: 600),
+                            duration: const Duration(milliseconds: 400),
+                          ),
+                    ),
+                  ),
+                  const SizedBox(height: AppTheme.spacingXL),
+                ],
               ),
-              // 캐릭터 섹션 - 최대 너비 제한으로 가독성 확보
-              Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 600),
-                  child: _buildCharacterConversation(context, lang)
-                      .animate()
-                      .fadeIn(
-                        delay: const Duration(milliseconds: 600),
-                        duration: const Duration(milliseconds: 400),
-                      ),
-                ),
-              ),
-              const SizedBox(height: AppTheme.spacingXL),
-            ],
+            ),
           ),
         ),
       ),
@@ -101,15 +109,14 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildLocaleToggle(BuildContext context, LocaleProvider locale) {
-    return GestureDetector(
-      onTap: () => locale.toggleLocale(),
+    return _HoverableButton(
+      onTap: () {
+        if (!kIsWeb) HapticFeedback.lightImpact();
+        locale.toggleLocale();
+      },
+      borderRadius: BorderRadius.circular(AppTheme.radiusFull),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: AppTheme.surface,
-          borderRadius: BorderRadius.circular(AppTheme.radiusFull),
-          boxShadow: AppTheme.cardShadow,
-        ),
         child: Text(
           locale.isKorean ? '한국어' : 'EN',
           style: TextStyle(
@@ -127,20 +134,17 @@ class HomeScreen extends StatelessWidget {
     // Use actual theme brightness, not just ThemeMode setting
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return GestureDetector(
-      onTap: () => themeProvider.toggleTheme(platformBrightness),
-      child: Container(
+    return _HoverableButton(
+      onTap: () {
+        if (!kIsWeb) HapticFeedback.lightImpact();
+        themeProvider.toggleTheme(platformBrightness);
+      },
+      isCircle: true,
+      child: SizedBox(
         width: 40,
         height: 40,
-        decoration: BoxDecoration(
-          color: AppTheme.surface,
-          shape: BoxShape.circle,
-          boxShadow: AppTheme.cardShadow,
-        ),
         child: Icon(
-          isDark
-              ? Icons.light_mode_rounded
-              : Icons.dark_mode_rounded,
+          isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
           color: AppTheme.textSecondary,
           size: 20,
         ),
@@ -149,16 +153,15 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildInfoButton(BuildContext context, String lang) {
-    return GestureDetector(
-      onTap: () => _showInfoDialog(context, lang),
-      child: Container(
+    return _HoverableButton(
+      onTap: () {
+        if (!kIsWeb) HapticFeedback.lightImpact();
+        _showInfoDialog(context, lang);
+      },
+      isCircle: true,
+      child: SizedBox(
         width: 40,
         height: 40,
-        decoration: BoxDecoration(
-          color: AppTheme.surface,
-          shape: BoxShape.circle,
-          boxShadow: AppTheme.cardShadow,
-        ),
         child: Icon(
           Icons.info_outline_rounded,
           color: AppTheme.textSecondary,
@@ -197,7 +200,7 @@ class HomeScreen extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             Text(
-              'WiFi QR',
+              '우리가게 와이파이',
               style: TextStyle(
                 fontWeight: FontWeight.w700,
                 color: AppTheme.textPrimary,
@@ -211,18 +214,6 @@ class HomeScreen extends StatelessWidget {
             _buildInfoRow(
               isKorean ? '버전' : 'Version',
               'v${packageInfo.version}',
-            ),
-            const SizedBox(height: 16),
-            Text(
-              isKorean
-                  ? 'WiFi 정보를 QR 코드로 만들어\n쉽게 공유할 수 있는 앱입니다.'
-                  : 'Create QR codes for WiFi\nand share them easily.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 13,
-                color: AppTheme.textSecondary,
-                height: 1.5,
-              ),
             ),
             const SizedBox(height: 20),
             SizedBox(
@@ -268,10 +259,7 @@ class HomeScreen extends StatelessWidget {
       children: [
         Text(
           label,
-          style: TextStyle(
-            color: AppTheme.textSecondary,
-            fontSize: 14,
-          ),
+          style: TextStyle(color: AppTheme.textSecondary, fontSize: 14),
         ),
         Text(
           value,
@@ -290,7 +278,7 @@ class HomeScreen extends StatelessWidget {
       scheme: 'mailto',
       path: 'tbd@tbd.com',
       queryParameters: {
-        'subject': isKorean ? 'WiFi QR 앱 건의사항' : 'WiFi QR App Feedback',
+        'subject': isKorean ? '우리가게 와이파이 앱 건의사항' : '우리가게 와이파이 App Feedback',
       },
     );
 
@@ -312,11 +300,7 @@ class HomeScreen extends StatelessWidget {
               color: AppTheme.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
             ),
-            child: Icon(
-              Icons.wifi_rounded,
-              color: AppTheme.primary,
-              size: 20,
-            ),
+            child: Icon(Icons.wifi_rounded, color: AppTheme.primary, size: 20),
           ),
           const SizedBox(width: AppTheme.spacingMD),
           Expanded(
@@ -326,24 +310,20 @@ class HomeScreen extends StatelessWidget {
                 Text(
                   AppTranslations.get('create_new', lang).replaceAll('\n', ' '),
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   AppTranslations.get('create_description', lang),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppTheme.textSecondary,
-                      ),
+                    color: AppTheme.textSecondary,
+                  ),
                 ),
               ],
             ),
           ),
-          Icon(
-            Icons.arrow_forward_rounded,
-            color: AppTheme.primary,
-            size: 20,
-          ),
+          Icon(Icons.arrow_forward_rounded, color: AppTheme.primary, size: 20),
         ],
       ),
     );
@@ -389,9 +369,9 @@ class HomeScreen extends StatelessWidget {
           Expanded(
             child: Text(
               text,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppTheme.textSecondary,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: AppTheme.textSecondary),
             ),
           ),
         ],
@@ -407,17 +387,19 @@ class HomeScreen extends StatelessWidget {
       children: [
         // Sad customer - left aligned
         _buildCharacterRow(
+          context,
           imagePath: 'assets/images/sad_costomer_nobg.png',
           message: isKorean
               ? '복잡한 비밀번호,\n입력하기 귀찮아요.'
               : 'Complex passwords\nare annoying to type.',
           isLeft: true,
-          bubbleColor: Colors.grey.shade200,
-          textColor: Colors.grey.shade700,
+          bubbleColor: Colors.orange.shade100,
+          textColor: Colors.orange.shade800,
         ),
         const SizedBox(height: AppTheme.spacingMD),
         // Master - right aligned
         _buildCharacterRow(
+          context,
           imagePath: 'assets/images/master_nobg.png',
           message: isKorean
               ? '기본 카메라로\n스캔만 해주세요!'
@@ -429,6 +411,7 @@ class HomeScreen extends StatelessWidget {
         const SizedBox(height: AppTheme.spacingMD),
         // Happy customer - left aligned
         _buildCharacterRow(
+          context,
           imagePath: 'assets/images/happy_costomer_nobg.png',
           message: isKorean ? '이 매장 편하네!' : 'This place is convenient!',
           isLeft: true,
@@ -439,14 +422,15 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCharacterRow({
+  Widget _buildCharacterRow(
+    BuildContext context, {
     required String imagePath,
     required String message,
     required bool isLeft,
     required Color bubbleColor,
     required Color textColor,
   }) {
-    const characterSize = 120.0;
+    final characterSize = Responsive.characterImageSize(context);
 
     final bool isMaster = imagePath.contains('master');
 
@@ -554,9 +538,19 @@ class _BubblePainter extends CustomPainter {
       path.lineTo(size.width - radius, 0);
       path.quadraticBezierTo(size.width, 0, size.width, radius);
       path.lineTo(size.width, size.height - radius);
-      path.quadraticBezierTo(size.width, size.height, size.width - radius, size.height);
+      path.quadraticBezierTo(
+        size.width,
+        size.height,
+        size.width - radius,
+        size.height,
+      );
       path.lineTo(tailWidth + radius, size.height);
-      path.quadraticBezierTo(tailWidth, size.height, tailWidth, size.height - radius);
+      path.quadraticBezierTo(
+        tailWidth,
+        size.height,
+        tailWidth,
+        size.height - radius,
+      );
       path.lineTo(tailWidth, centerY + 8);
       // 꼬리 (중앙)
       path.lineTo(0, centerY);
@@ -567,13 +561,23 @@ class _BubblePainter extends CustomPainter {
       // 오른쪽 말풍선: 꼬리가 오른쪽 중앙
       path.moveTo(radius, 0);
       path.lineTo(size.width - tailWidth - radius, 0);
-      path.quadraticBezierTo(size.width - tailWidth, 0, size.width - tailWidth, radius);
+      path.quadraticBezierTo(
+        size.width - tailWidth,
+        0,
+        size.width - tailWidth,
+        radius,
+      );
       path.lineTo(size.width - tailWidth, centerY - 8);
       // 꼬리 (중앙)
       path.lineTo(size.width, centerY);
       path.lineTo(size.width - tailWidth, centerY + 8);
       path.lineTo(size.width - tailWidth, size.height - radius);
-      path.quadraticBezierTo(size.width - tailWidth, size.height, size.width - tailWidth - radius, size.height);
+      path.quadraticBezierTo(
+        size.width - tailWidth,
+        size.height,
+        size.width - tailWidth - radius,
+        size.height,
+      );
       path.lineTo(radius, size.height);
       path.quadraticBezierTo(0, size.height, 0, size.height - radius);
       path.lineTo(0, radius);
@@ -586,4 +590,61 @@ class _BubblePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+/// Hoverable button widget for header buttons
+class _HoverableButton extends StatefulWidget {
+  final VoidCallback onTap;
+  final Widget child;
+  final bool isCircle;
+  final BorderRadius? borderRadius;
+
+  const _HoverableButton({
+    required this.onTap,
+    required this.child,
+    this.isCircle = false,
+    this.borderRadius,
+  });
+
+  @override
+  State<_HoverableButton> createState() => _HoverableButtonState();
+}
+
+class _HoverableButtonState extends State<_HoverableButton> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          transform: _isHovered
+              ? (Matrix4.identity()..translate(0.0, -2.0))
+              : Matrix4.identity(),
+          decoration: BoxDecoration(
+            color: _isHovered
+                ? AppTheme.primary.withValues(alpha: 0.1)
+                : AppTheme.surface,
+            shape: widget.isCircle ? BoxShape.circle : BoxShape.rectangle,
+            borderRadius: widget.isCircle ? null : widget.borderRadius,
+            boxShadow: _isHovered
+                ? [
+                    BoxShadow(
+                      color: AppTheme.primary.withValues(alpha: 0.2),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                : AppTheme.cardShadow,
+          ),
+          child: widget.child,
+        ),
+      ),
+    );
+  }
 }

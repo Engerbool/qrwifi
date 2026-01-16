@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="qrwifi"
+        android:label="우리가게 와이파이"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

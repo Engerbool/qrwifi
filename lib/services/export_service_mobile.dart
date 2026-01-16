@@ -13,7 +13,8 @@ Future<ExportResult> saveImage(Uint8List imageBytes, String filename) async {
       if (!status) {
         return ExportResult(
           success: false,
-          message: 'Storage permission denied. Please grant permission in settings.',
+          message:
+              'Storage permission denied. Please grant permission in settings.',
         );
       }
     }
@@ -32,10 +33,7 @@ Future<ExportResult> saveImage(Uint8List imageBytes, String filename) async {
         filePath: result['filePath']?.toString(),
       );
     } else {
-      return ExportResult(
-        success: false,
-        message: 'Failed to save to gallery',
-      );
+      return ExportResult(success: false, message: 'Failed to save to gallery');
     }
   } catch (e) {
     return ExportResult(

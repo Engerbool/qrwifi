@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -29,7 +30,7 @@ class SizePicker extends StatelessWidget {
                   isSelected: isSelected,
                   isKorean: isKorean,
                   onTap: () {
-                    HapticFeedback.lightImpact();
+                    if (!kIsWeb) HapticFeedback.lightImpact();
                     provider.setSize(size);
                   },
                 ),
@@ -42,7 +43,7 @@ class SizePicker extends StatelessWidget {
   }
 }
 
-class _SizeCard extends StatelessWidget {
+class _SizeCard extends StatefulWidget {
   final PosterSize size;
   final bool isSelected;
   final bool isKorean;
@@ -56,91 +57,119 @@ class _SizeCard extends StatelessWidget {
   });
 
   @override
+  State<_SizeCard> createState() => _SizeCardState();
+}
+
+class _SizeCardState extends State<_SizeCard> {
+  bool _isHovered = false;
+
+  @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(AppTheme.spacingMD),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppTheme.primary.withValues(alpha: 0.08)
-              : AppTheme.surface,
-          borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-          border: Border.all(
-            color: isSelected ? AppTheme.primary : AppTheme.border,
-            width: isSelected ? 2 : 1,
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.all(AppTheme.spacingMD),
+          transform: _isHovered && !widget.isSelected
+              ? (Matrix4.identity()..translate(0.0, -2.0))
+              : Matrix4.identity(),
+          decoration: BoxDecoration(
+            color: widget.isSelected
+                ? AppTheme.primary.withValues(alpha: 0.08)
+                : _isHovered
+                    ? AppTheme.primary.withValues(alpha: 0.04)
+                    : AppTheme.surface,
+            borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+            border: Border.all(
+              color: widget.isSelected
+                  ? AppTheme.primary
+                  : _isHovered
+                      ? AppTheme.primary.withValues(alpha: 0.5)
+                      : AppTheme.border,
+              width: widget.isSelected ? 2 : 1,
+            ),
+            boxShadow: widget.isSelected || _isHovered
+                ? AppTheme.cardShadow
+                : null,
           ),
-          boxShadow: isSelected ? AppTheme.cardShadow : null,
-        ),
-        child: Column(
-          children: [
-            // Size preview icon (fixed height container for alignment)
-            SizedBox(
-              height: 44,
-              child: Center(
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  width: size.isLandscape ? 48 : 32,
-                  height: size.isLandscape ? 28 : 44,
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? AppTheme.primary.withValues(alpha: 0.15)
-                        : AppTheme.border.withValues(alpha: 0.5),
-                    borderRadius: BorderRadius.circular(4),
-                    border: Border.all(
-                      color: isSelected ? AppTheme.primary : AppTheme.textTertiary,
-                      width: 1.5,
+          child: Column(
+            children: [
+              // Size preview icon (fixed height container for alignment)
+              SizedBox(
+                height: 44,
+                child: Center(
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    width: widget.size.isLandscape ? 48 : 32,
+                    height: widget.size.isLandscape ? 28 : 44,
+                    decoration: BoxDecoration(
+                      color: widget.isSelected || _isHovered
+                          ? AppTheme.primary.withValues(alpha: 0.15)
+                          : AppTheme.border.withValues(alpha: 0.5),
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(
+                        color: widget.isSelected || _isHovered
+                            ? AppTheme.primary
+                            : AppTheme.textTertiary,
+                        width: 1.5,
+                      ),
                     ),
-                  ),
-                  child: Icon(
-                    Icons.qr_code_2_rounded,
-                    size: size.isLandscape ? 16 : 20,
-                    color: isSelected ? AppTheme.primary : AppTheme.textSecondary,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: AppTheme.spacingSM),
-
-            // Size name
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (isSelected)
-                  Padding(
-                    padding: const EdgeInsets.only(right: 4),
                     child: Icon(
-                      Icons.check_circle_rounded,
-                      size: 14,
-                      color: AppTheme.primary,
+                      Icons.qr_code_2_rounded,
+                      size: widget.size.isLandscape ? 16 : 20,
+                      color: widget.isSelected || _isHovered
+                          ? AppTheme.primary
+                          : AppTheme.textSecondary,
                     ),
-                  ),
-                Flexible(
-                  child: Text(
-                    isKorean ? size.nameKo : size.name,
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                      color: isSelected ? AppTheme.primary : AppTheme.textPrimary,
-                    ),
-                    textAlign: TextAlign.center,
-                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 2),
-
-            // Dimensions
-            Text(
-              '${size.widthMm.toInt()}x${size.heightMm.toInt()}mm',
-              style: TextStyle(
-                fontSize: 11,
-                color: AppTheme.textTertiary,
               ),
-            ),
-          ],
+              const SizedBox(height: AppTheme.spacingSM),
+
+              // Size name
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (widget.isSelected)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 4),
+                      child: Icon(
+                        Icons.check_circle_rounded,
+                        size: 14,
+                        color: AppTheme.primary,
+                      ),
+                    ),
+                  Flexible(
+                    child: Text(
+                      widget.isKorean ? widget.size.nameKo : widget.size.name,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: widget.isSelected
+                            ? FontWeight.w600
+                            : FontWeight.w500,
+                        color: widget.isSelected || _isHovered
+                            ? AppTheme.primary
+                            : AppTheme.textPrimary,
+                      ),
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 2),
+
+              // Dimensions
+              Text(
+                '${widget.size.widthMm.toInt()}x${widget.size.heightMm.toInt()}mm',
+                style: TextStyle(fontSize: 11, color: AppTheme.textTertiary),
+              ),
+            ],
+          ),
         ),
       ),
     );

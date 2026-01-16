@@ -1,11 +1,11 @@
 {
-    "name": "qrwifi",
-    "short_name": "qrwifi",
+    "name": "우리가게 와이파이",
+    "short_name": "우리가게와이파이",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "1분이면 WiFi QR 코드 포스터를 만들어요",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

@@ -8,7 +8,8 @@ import '../config/constants.dart';
 // Conditional imports for platform-specific code
 import 'export_service_stub.dart'
     if (dart.library.html) 'export_service_web.dart'
-    if (dart.library.io) 'export_service_mobile.dart' as platform;
+    if (dart.library.io) 'export_service_mobile.dart'
+    as platform;
 
 /// Result of export operation
 class ExportResult {
@@ -16,11 +17,7 @@ class ExportResult {
   final String message;
   final String? filePath;
 
-  ExportResult({
-    required this.success,
-    required this.message,
-    this.filePath,
-  });
+  ExportResult({required this.success, required this.message, this.filePath});
 }
 
 /// Service for exporting poster as image

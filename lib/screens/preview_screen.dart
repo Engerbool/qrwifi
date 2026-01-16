@@ -5,9 +5,11 @@ import '../config/theme.dart';
 import '../config/translations.dart';
 import '../providers/locale_provider.dart';
 import '../providers/poster_provider.dart';
+import '../utils/responsive.dart';
 import '../widgets/poster_canvas.dart';
 import '../widgets/toss_button.dart';
 import '../services/export_service.dart';
+import '../config/routes.dart';
 
 class PreviewScreen extends StatefulWidget {
   const PreviewScreen({super.key});
@@ -64,9 +66,9 @@ class _PreviewScreenState extends State<PreviewScreen> {
           Expanded(
             child: Text(
               AppTranslations.get('preview', lang),
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
             ),
           ),
           Consumer<PosterProvider>(
@@ -92,26 +94,27 @@ class _PreviewScreenState extends State<PreviewScreen> {
         final isLandscape = provider.selectedSize.isLandscape;
 
         return Center(
-          child: Container(
-            margin: const EdgeInsets.symmetric(vertical: AppTheme.spacingMD),
-            // 가로(명함)는 전체 너비 사용, 세로(A4)는 너비 제한
-            constraints: BoxConstraints(
-              maxWidth: isLandscape ? double.infinity : 400,
-            ),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-              boxShadow: AppTheme.elevatedShadow,
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-              child: PosterCanvas(
-                posterKey: _posterKey,
-                isPreview: true,
+              child: Container(
+                margin: const EdgeInsets.symmetric(
+                  vertical: AppTheme.spacingMD,
+                ),
+                // 가로(명함)는 전체 너비 사용, 세로(A4)는 반응형 너비 제한
+                constraints: BoxConstraints(
+                  maxWidth: isLandscape
+                      ? double.infinity
+                      : Responsive.previewMaxWidth(context),
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                  boxShadow: AppTheme.elevatedShadow,
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                  child: PosterCanvas(posterKey: _posterKey, isPreview: true),
+                ),
               ),
-            ),
-          ),
-        )
+            )
             .animate()
             .fadeIn(
               delay: const Duration(milliseconds: 200),
@@ -166,9 +169,9 @@ class _PreviewScreenState extends State<PreviewScreen> {
                 Text(
                   AppTranslations.get('poster_ready', lang),
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        color: AppTheme.success,
-                        fontWeight: FontWeight.w600,
-                      ),
+                    color: AppTheme.success,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ],
             ),
@@ -190,24 +193,29 @@ class _PreviewScreenState extends State<PreviewScreen> {
             },
           ),
           const SizedBox(height: AppTheme.spacingSM),
-          // Edit Button
+          // Edit Layout Button
           TossSecondaryButton(
-            text: AppTranslations.get('edit_poster', lang),
-            icon: Icons.edit_rounded,
-            onPressed: () => Navigator.pop(context),
+            key: const Key('edit-layout-button'),
+            text: AppTranslations.get('edit_layout', lang),
+            icon: Icons.dashboard_customize_rounded,
+            onPressed: () =>
+                Navigator.pushNamed(context, AppRoutes.canvasEditor),
           ),
         ],
       ),
-    )
-        .animate()
-        .fadeIn(
-          delay: const Duration(milliseconds: 400),
-          duration: const Duration(milliseconds: 400),
-        );
+    ).animate().fadeIn(
+      delay: const Duration(milliseconds: 400),
+      duration: const Duration(milliseconds: 400),
+    );
   }
 
   Future<void> _handleExport() async {
     final provider = context.read<PosterProvider>();
+
+    // Prevent duplicate clicks
+    if (provider.isExporting) return;
+
+    final lang = context.read<LocaleProvider>().locale.languageCode;
     provider.setExporting(true);
     provider.setExportError(null);
 
@@ -228,7 +236,7 @@ class _PreviewScreenState extends State<PreviewScreen> {
       }
     } catch (e) {
       if (mounted) {
-        _showError('Failed to export poster: $e');
+        _showError(AppTranslations.get('error_export', lang));
         provider.setExportError(e.toString());
       }
     } finally {
