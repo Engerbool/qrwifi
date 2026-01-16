@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:provider/provider.dart';
 import '../config/routes.dart';
 import '../config/theme.dart';
+import '../providers/poster_provider.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -15,6 +17,8 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      // 앱 시작 시 이전 세션 상태 초기화 (프라이버시 보호)
+      context.read<PosterProvider>().reset();
       _navigateToHome();
     });
   }
